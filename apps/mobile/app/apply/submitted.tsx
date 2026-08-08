@@ -14,8 +14,7 @@ import { Button, StatusPill, Text } from '@/ui';
  */
 export default function Submitted() {
   const insets = useSafeAreaInsets();
-  const { reference, status } = useLocalSearchParams<{ reference: string; status: string }>();
-  const approved = status === 'approved';
+  const { reference } = useLocalSearchParams<{ reference: string }>();
 
   return (
     <View
@@ -42,9 +41,7 @@ export default function Submitted() {
         <Text variant="titleSm">✓</Text>
       </View>
 
-      <Text variant="title">
-        {approved ? 'Your account is open' : 'Application received'}
-      </Text>
+      <Text variant="title">Application received</Text>
 
       <View style={{ marginTop: space.lg, gap: space.md, alignItems: 'flex-start' }}>
         <View
@@ -57,23 +54,19 @@ export default function Submitted() {
         >
           <Text variant="data">{reference}</Text>
         </View>
-        <StatusPill status={approved ? 'approved' : 'pending'} />
+        <StatusPill status="pending" />
       </View>
 
       <Text variant="body" tone="charcoal" style={{ marginTop: space.lg, maxWidth: 340 }}>
-        {approved
-          ? 'You can start receiving payments straight away. Keep your reference number in case you need to contact support.'
-          : 'A member of our compliance team is reviewing your application. Most reviews finish within one working day, and we will notify you as soon as it is done.'}
+        A member of our compliance team is reviewing your application. Most reviews
+        finish within one working day, and we will notify you as soon as it is done.
+        Keep your reference number — you can use it to check progress.
       </Text>
 
       <View style={{ flex: 1 }} />
 
       <View style={{ gap: space.md }}>
-        <Button
-          label={approved ? 'Continue' : 'Check status'}
-          onPress={() => router.replace('/status')}
-          variant={approved ? 'primary' : 'outlined'}
-        />
+        <Button label="Check status" onPress={() => router.replace('/status')} />
         <Button label="Back to start" variant="outlined" onPress={() => router.replace('/')} />
       </View>
     </View>

@@ -32,6 +32,19 @@ import { decide, getCase, type CaseDetail } from '@/lib/api';
 
 type Action = 'approve' | 'reject' | 'escalate';
 
+/**
+ * The model's recommendation, in the officer's language.
+ *
+ * `auto_approve` is a legacy name from when low-risk applications opened
+ * accounts on their own. Nothing is automatic now — it reads as a
+ * recommendation to approve, and a human still has to make it true.
+ */
+const RECOMMENDATION: Record<string, string> = {
+  auto_approve: 'Approve — nothing of concern found',
+  manual_review: 'Review — something needs a second look',
+  edd_queue: 'Enhanced due diligence — do not open without checks',
+};
+
 const ACTION_COPY: Record<Action, { title: string; cta: string; variant: 'approve' | 'reject' | 'escalate' }> = {
   approve: { title: 'Approve this application?', cta: 'Approve', variant: 'approve' },
   reject: { title: 'Reject this application?', cta: 'Reject', variant: 'reject' },
@@ -119,12 +132,40 @@ export default function CaseDetailScreen() {
           </Text>
         </Card>
 
-        {/* Risk */}
+        {/* Risk + what the AI recommends. The officer confirms or overrides. */}
         {data.risk && (
           <View style={{ gap: space.md }}>
             <RiskBadge level={data.risk.level} confidence={data.risk.confidence} />
-            <Text variant="caption" tone="fog">
-              Recommended: {humanize(data.risk.recommendedAction)} · {data.risk.model}
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: space.sm,
+                borderRadius: radius.row,
+                borderWidth: border.field,
+                borderColor: color.vastInk,
+                paddingVertical: space.md,
+                paddingHorizontal: space.base,
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Text variant="micro">AI recommends</Text>
+                <Text
+                  variant="bodySm"
+                  style={{ fontFamily: 'Archivo_600SemiBold', marginTop: 2 }}
+                >
+                  {RECOMMENDATION[data.risk.recommendedAction] ??
+                    humanize(data.risk.recommendedAction)}
+                </Text>
+              </View>
+              <Text variant="caption" tone="fog">
+                yours to confirm
+              </Text>
+            </View>
+
+            <Text variant="dataSm" tone="fog" style={{ fontSize: 12 }}>
+              {data.risk.model}
               {data.risk.latencyMs != null ? ` · ${data.risk.latencyMs}ms` : ''}
             </Text>
           </View>

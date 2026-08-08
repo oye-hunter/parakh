@@ -27,8 +27,22 @@ export default function StatusScreen() {
     setLoading(true);
     setResult(null);
     try {
-      const isCnic = trimmed.includes('-') || /^\d{13}$/.test(trimmed);
-      const res = await lookupStatus(isCnic ? { cnic: trimmed } : { reference: trimmed });
+      /**
+       * Both formats contain hyphens, so "has a hyphen" cannot tell them apart —
+       * an earlier version used that test and sent every reference number
+       * (PK-4413) to the CNIC lookup, which always 404'd.
+       *
+       * Match on shape instead: a CNIC is 13 digits, optionally grouped 5-7-1.
+       * Anything else is treated as a reference.
+       */
+      const digits = trimmed.replace(/\D/g, '');
+      const isCnic = /^\d{5}-\d{7}-\d$/.test(trimmed) || /^\d{13}$/.test(digits);
+
+      const res = await lookupStatus(
+        isCnic
+          ? { cnic: `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}` }
+          : { reference: trimmed.toUpperCase() },
+      );
       setResult(res.application);
     } catch (err: any) {
       if (err instanceof ApiError) {

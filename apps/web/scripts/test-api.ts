@@ -114,7 +114,7 @@ function applicant(overrides: Record<string, unknown> = {}) {
     existingBankRelationship: true,
     meta: {
       deviceFingerprint: `fp-test-${uniq}`,
-      agentPointId: 'TST-001',
+      agentPointId: `TST-${uniq.slice(-4)}`,
       sessionCity: 'Lahore',
     },
     ...overrides,
@@ -212,18 +212,25 @@ async function main() {
   }
 
   /* ---- clean applicant ---- */
-  group('Clean applicant → low risk, auto-approved');
+  group('Clean applicant → low risk, still queued for an officer');
   let cleanRef = '';
   {
     // Applicants have no account yet — this endpoint must stay public.
     const { status, json } = await api('POST', '/api/applications', applicant(), { anonymous: true });
     check('accepted with 201 without any session', status === 201, `got ${status}: ${JSON.stringify(json).slice(0, 120)}`);
     check('returns a reference', typeof json.reference === 'string' && json.reference.startsWith('PK-'));
-    check('approved outright', json.status === 'approved', json.status);
+    // No auto-approval: an account never opens without a human decision.
+    check('held for officer review, never auto-approved', json.status === 'under_review', json.status);
     check('leaks no risk level to the applicant', json.riskLevel === undefined);
     check('leaks no reasoning to the applicant', json.reasoning === undefined);
     check('leaks no signals to the applicant', json.signals === undefined);
     cleanRef = json.reference;
+
+    const all = await api('GET', '/api/cases');
+    const visible = all.json.items?.find((i: any) => i.reference === cleanRef);
+    check('a low-risk application is visible to the officer', Boolean(visible), 'missing from /api/cases');
+    check('it is awaiting review, not resolved', visible?.status === 'pending', visible?.status);
+    check('and is NOT auto-approved', visible?.status !== 'approved', visible?.status);
     console.log(c.dim(`    ${cleanRef}`));
   }
 
@@ -238,7 +245,24 @@ async function main() {
 
     const found = await api('GET', `/api/applications/status?reference=${cleanRef}`, undefined, { anonymous: true });
     check('looks up status by reference without auth', found.status === 200, `got ${found.status}`);
-    check('returns reference and status', found.json.application?.reference === cleanRef && found.json.application?.status === 'approved');
+    check(
+      'returns the reference',
+      found.json.application?.reference === cleanRef,
+      found.json.application?.reference,
+    );
+    // The public status is mapped, never the internal one — an applicant must
+    // not learn they are specifically in the enhanced-due-diligence queue.
+    check(
+      'maps internal status to an applicant-safe value',
+      found.json.application?.status === 'under_review',
+      found.json.application?.status,
+    );
+    check(
+      'never leaks internal queue states',
+      !['edd_queue', 'escalated', 'pending'].includes(found.json.application?.status),
+      found.json.application?.status,
+    );
+    check('leaks no risk data', found.json.application?.riskLevel === undefined);
     check('leaks no risk level', found.json.application?.riskLevel === undefined);
     check('leaks no reasoning', found.json.application?.reasoning === undefined);
     check('leaks no signals', found.json.application?.signals === undefined);
@@ -340,7 +364,7 @@ async function main() {
     // First member — nothing to compare against, must look clean.
     const first = await api('POST', '/api/applications', member(1));
     check('first ring member is accepted', first.status === 201, `got ${first.status}`);
-    check('first ring member looks clean in isolation', first.json.status === 'approved', first.json.status);
+    check('first ring member looks clean in isolation', first.json.status === 'under_review', first.json.status);
     ringRefs.push(first.json.reference);
 
     const secondRes = await api('POST', '/api/applications', member(2));
@@ -370,7 +394,7 @@ async function main() {
     const first2 = byRef(ringRefs[0]!);
     firstRingCaseId = first2?.caseId ?? '';
     check(
-      'first member was retroactively re-flagged',
+      'first member was retroactively re-flagged into the EDD queue',
       first2?.status === 'edd_queue',
       `status is ${first2?.status}`,
     );

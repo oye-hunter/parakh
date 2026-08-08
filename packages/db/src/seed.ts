@@ -475,11 +475,13 @@ async function main() {
       createdAt: submittedAt,
     });
 
+    // Nothing is auto-approved: every application waits for an officer. Risk
+    // decides urgency (edd_queue vs pending), never outcome.
     await db.insert(cases).values({
       applicationId: row.id,
-      status: profile.riskLevel === 'high' ? 'edd_queue' : profile.riskLevel === 'medium' ? 'pending' : 'approved',
-      queuedAt: profile.riskLevel === 'high' ? submittedAt : null,
-      resolvedAt: profile.riskLevel === 'low' ? submittedAt : null,
+      status: profile.riskLevel === 'high' ? 'edd_queue' : 'pending',
+      queuedAt: submittedAt,
+      resolvedAt: null,
       createdAt: submittedAt,
       updatedAt: submittedAt,
     });

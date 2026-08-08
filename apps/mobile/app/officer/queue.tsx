@@ -14,16 +14,40 @@ import {
 import { Card, HeaderBand, RiskBadge, StatusPill, Text } from '@/ui';
 import { getCases, type CaseListItem } from '@/lib/api';
 
+/**
+ * `all` means every application, not every EDD-queue item.
+ *
+ * An earlier version always fetched `{ status: 'edd_queue' }` and then filtered
+ * that result client-side, so "All" silently meant "all high-risk cases" and an
+ * officer could never see the low and medium applications that were approved
+ * automatically — which is most of them.
+ */
 const FILTERS = [
   { key: 'all', label: 'All' },
+  { key: 'queue', label: 'In queue' },
   { key: 'high', label: 'High' },
   { key: 'medium', label: 'Medium' },
+  { key: 'low', label: 'Low' },
   { key: 'clustered', label: 'Clustered' },
 ] as const;
 
 type FilterKey = (typeof FILTERS)[number]['key'];
 
-/** O3 · EDD queue */
+/** What each chip asks the server for. Filtering happens in the query, not after it. */
+function queryFor(filter: FilterKey): { status?: string; risk?: string } {
+  switch (filter) {
+    case 'queue':
+      return { status: 'edd_queue' };
+    case 'high':
+    case 'medium':
+    case 'low':
+      return { risk: filter };
+    default:
+      return {};
+  }
+}
+
+/** O3 · Applications — the officer's working list. */
 export default function Queue() {
   const params = useLocalSearchParams<{ cluster?: string }>();
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -32,14 +56,12 @@ export default function Queue() {
 
   const load = useCallback(async () => {
     try {
-      const res = await getCases(
-        params.cluster ? { cluster: params.cluster } : { status: 'edd_queue' },
-      );
+      const res = await getCases(params.cluster ? { cluster: params.cluster } : queryFor(filter));
       setItems(res.items);
     } catch (err) {
       if ((err as { status?: number }).status === 401) router.replace('/officer/sign-in');
     }
-  }, [params.cluster]);
+  }, [params.cluster, filter]);
 
   useFocusEffect(
     useCallback(() => {
@@ -47,22 +69,27 @@ export default function Queue() {
     }, [load]),
   );
 
-  const visible = items.filter((i) => {
-    if (filter === 'all') return true;
-    if (filter === 'clustered') return Boolean(i.clusterRef);
-    return i.riskLevel === filter;
-  });
+  // Cluster membership is a property of the signals, not something the list
+  // endpoint filters on, so that one stays client-side.
+  const visible = filter === 'clustered' ? items.filter((i) => Boolean(i.clusterRef)) : items;
 
   return (
     <View style={{ flex: 1, backgroundColor: surface.console }}>
       <HeaderBand
-        title={params.cluster ? `Cluster ${params.cluster}` : 'EDD queue'}
+        title={params.cluster ? `Cluster ${params.cluster}` : 'Applications'}
         onBack={() => router.back()}
+        right={
+          <Text variant="caption" style={{ color: color.lumenCream }}>
+            {visible.length}
+          </Text>
+        }
       />
 
       {!params.cluster && (
-        <View
-          style={{
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
             flexDirection: 'row',
             gap: space.sm,
             paddingHorizontal: layout.gutter,
@@ -93,7 +120,7 @@ export default function Queue() {
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       )}
 
       <ScrollView
@@ -112,7 +139,9 @@ export default function Queue() {
         {visible.length === 0 ? (
           <Card>
             <Text variant="caption" tone="fog">
-              Nothing in the queue.
+              {filter === 'all'
+                ? 'No applications yet.'
+                : `No applications match “${FILTERS.find((f) => f.key === filter)?.label}”.`}
             </Text>
           </Card>
         ) : (

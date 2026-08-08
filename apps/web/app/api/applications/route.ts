@@ -78,8 +78,20 @@ const Body = z.object({
 
 const CLUSTER_WINDOW_MS = 24 * 3_600_000;
 
+/**
+ * Where a freshly scored application lands.
+ *
+ * **Nothing is ever approved automatically.** The AI produces a recommendation
+ * and the evidence behind it; a compliance officer makes the decision. An
+ * account that opens because a model said so is a decision nobody signed, and
+ * the audit trail would have a gap exactly where the accountability should be.
+ *
+ * Risk decides *urgency*, not outcome:
+ *   high          -> edd_queue, reviewed first
+ *   low / medium  -> pending, routine review
+ */
 function statusFor(level: 'low' | 'medium' | 'high') {
-  return level === 'high' ? 'edd_queue' : level === 'medium' ? 'pending' : 'approved';
+  return level === 'high' ? 'edd_queue' : 'pending';
 }
 
 /**
@@ -109,10 +121,14 @@ async function reflagClusterPeers(
     .where(inArray(cases.applicationId, peerIds));
 
   for (const peer of peerCases) {
-    // Never touch a case a human has already ruled on.
-    if (['approved', 'declined', 'escalated'].includes(peer.case.status)) {
-      if (peer.case.status !== 'approved') continue;
-    }
+    /**
+     * Never overwrite a human decision. Once an officer has approved, declined
+     * or escalated a case, a later pattern is new information for them to act
+     * on — not licence for the system to silently reverse them.
+     *
+     * Only cases still awaiting review get pulled into the EDD queue.
+     */
+    if (peer.case.status !== 'pending' && peer.case.status !== 'edd_queue') continue;
 
     const existingSignals = await db
       .select()
@@ -319,8 +335,10 @@ export const POST = route('POST /api/applications', async (request: Request) => 
   await db.insert(cases).values({
     applicationId: row.id,
     status,
-    queuedAt: status === 'edd_queue' ? submittedAt : null,
-    resolvedAt: status === 'approved' ? submittedAt : null,
+    // Every case is queued the moment it is scored, because every case now
+    // waits for a human. `resolvedAt` stays null until an officer decides.
+    queuedAt: submittedAt,
+    resolvedAt: null,
     createdAt: submittedAt,
     updatedAt: submittedAt,
   });
@@ -332,7 +350,9 @@ export const POST = route('POST /api/applications', async (request: Request) => 
   return NextResponse.json(
     {
       reference: row.reference,
-      status: status === 'approved' ? 'approved' : 'under_review',
+      // Always under review — an applicant is never told they passed before an
+      // officer has actually said so.
+      status: 'under_review',
       submittedAt: submittedAt.toISOString(),
     },
     { status: 201 },
