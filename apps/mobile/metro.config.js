@@ -1,20 +1,16 @@
 /**
- * Metro, configured for a pnpm monorepo.
+ * Metro config for this monorepo.
  *
- * This is the single most common reason an Expo app inside a workspace fails to
- * start. Three things have to be true:
+ * Kept deliberately small. An earlier version carried the standard
+ * pnpm-monorepo workarounds — `disableHierarchicalLookup: true` and a
+ * hand-written `watchFolders` — but those exist for pnpm's *isolated*,
+ * symlinked layout. This workspace uses `nodeLinker: hoisted`
+ * (see pnpm-workspace.yaml), so node_modules is already flat and those
+ * overrides do real damage: disabling hierarchical lookup stops Metro from
+ * resolving legitimately-nested copies, and replacing `watchFolders` drops the
+ * entries Expo's own config sets up.
  *
- *  1. Metro watches the workspace root, or edits to packages/* never trigger a
- *     rebuild.
- *  2. It resolves from both node_modules folders, because pnpm hoists shared
- *     dependencies to the root and keeps package-local ones nested.
- *  3. Hierarchical lookup is off, so Metro cannot silently walk up and pick a
- *     second copy of React — which produces the "Invalid hook call" error that
- *     looks like a bug in your components and is not.
- *
- * The `extensionAlias` entry mirrors next.config.ts: our workspace packages are
- * ESM TypeScript whose relative imports carry `.js` extensions, and bundlers do
- * not make that mapping on their own.
+ * So: start from Expo's defaults, and only *add* to them.
  */
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('node:path');
@@ -24,17 +20,15 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
-config.watchFolders = [workspaceRoot];
+// Append rather than replace, so edits to packages/* trigger a rebuild without
+// discarding whatever Expo already watches.
+config.watchFolders = Array.from(new Set([...(config.watchFolders ?? []), workspaceRoot]));
 
-config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, 'node_modules'),
-  path.resolve(workspaceRoot, 'node_modules'),
-];
-
-config.resolver.disableHierarchicalLookup = true;
-
-config.resolver.sourceExts = [...config.resolver.sourceExts, 'mjs', 'cjs'];
-
+/**
+ * Workspace packages are ESM TypeScript whose relative imports carry explicit
+ * `.js` extensions — required by Node and tsx, but bundlers do not make that
+ * mapping themselves. Mirrors the same setting in apps/web/next.config.ts.
+ */
 config.resolver.extensionAlias = {
   ...config.resolver.extensionAlias,
   '.js': ['.ts', '.tsx', '.js'],
