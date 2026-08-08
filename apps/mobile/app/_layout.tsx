@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -30,6 +30,13 @@ export default function RootLayout() {
     JetBrainsMono_500Medium,
   });
 
+  const [timedOut, setTimedOut] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 2500);
+    return () => clearTimeout(t);
+  }, []);
+
   const [draft, setDraft] = useState<Draft>(emptyDraft);
 
   const draftValue = useMemo(
@@ -44,12 +51,11 @@ export default function RootLayout() {
   );
 
   const onReady = useCallback(() => {
-    if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {});
-  }, [fontsLoaded, fontError]);
+    if (fontsLoaded || fontError || timedOut) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded, fontError, timedOut]);
 
-  // Rendering before the fonts resolve would flash the system face and then
-  // reflow every screen — worse than a beat of splash.
-  if (!fontsLoaded && !fontError) return null;
+  // Rendering before fonts resolve will fall back safely if fonts take longer than 2.5s
+  if (!fontsLoaded && !fontError && !timedOut) return null;
 
   return (
     <SafeAreaProvider>

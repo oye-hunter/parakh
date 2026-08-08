@@ -109,3 +109,51 @@ export const POST = route('POST /api/decisions', async (request: Request) => {
     decidedAt: decidedAt.toISOString(),
   });
 });
+
+/**
+ * GET /api/decisions?limit=50
+ *
+ * Standalone decision history audit trail endpoint (O6).
+ * Returns past officer decisions with officer identity, case reference,
+ * justification, and snapshotted AI risk & reasoning.
+ */
+export const GET = route('GET /api/decisions', async (request: Request) => {
+  const auth = await requireOfficer();
+  if (!auth.ok) return auth.response;
+
+  const url = new URL(request.url);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 100);
+
+  const decisionRecords = await db.query.decisions.findMany({
+    orderBy: (decisions, { desc }) => [desc(decisions.decidedAt)],
+    limit,
+    with: {
+      officer: {
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+      case: {
+        with: {
+          application: {
+            columns: {
+              reference: true,
+              fullName: true,
+              cnic: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return NextResponse.json({
+    success: true,
+    count: decisionRecords.length,
+    decisions: decisionRecords,
+  });
+});
+

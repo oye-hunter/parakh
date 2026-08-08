@@ -5,9 +5,11 @@
 export default function Home() {
   const endpoints = [
     ['POST', '/api/applications', 'Submit and score an application'],
+    ['GET', '/api/applications/status', 'Public application status lookup (A8)'],
     ['GET', '/api/cases', 'Officer queue — ?status= ?risk= ?cluster='],
     ['GET', '/api/cases/[id]', 'One case, fully loaded'],
-    ['POST', '/api/decisions', 'Approve / reject / escalate'],
+    ['POST', '/api/decisions', 'Approve / reject / escalate decision'],
+    ['GET', '/api/decisions', 'Standalone decision history audit trail (O6)'],
     ['GET', '/api/dashboard', 'Stats, distribution, active clusters'],
   ];
 

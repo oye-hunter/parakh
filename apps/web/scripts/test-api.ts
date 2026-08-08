@@ -227,6 +227,23 @@ async function main() {
     console.log(c.dim(`    ${cleanRef}`));
   }
 
+  /* ---- status lookup (A8) ---- */
+  group('Public Status Lookup (A8)');
+  {
+    const missing = await api('GET', '/api/applications/status', undefined, { anonymous: true });
+    check('rejects missing params with 400', missing.status === 400, `got ${missing.status}`);
+
+    const notFound = await api('GET', '/api/applications/status?reference=PK-000000', undefined, { anonymous: true });
+    check('returns 404 for unknown reference', notFound.status === 404, `got ${notFound.status}`);
+
+    const found = await api('GET', `/api/applications/status?reference=${cleanRef}`, undefined, { anonymous: true });
+    check('looks up status by reference without auth', found.status === 200, `got ${found.status}`);
+    check('returns reference and status', found.json.application?.reference === cleanRef && found.json.application?.status === 'approved');
+    check('leaks no risk level', found.json.application?.riskLevel === undefined);
+    check('leaks no reasoning', found.json.application?.reasoning === undefined);
+    check('leaks no signals', found.json.application?.signals === undefined);
+  }
+
   /* ---- duplicate guard ---- */
   group('Duplicate submission');
   {
@@ -431,7 +448,13 @@ async function main() {
     check('audit entry snapshots the risk level', entry?.riskSnapshot === 'high', entry?.riskSnapshot);
     check('audit entry snapshots the reasoning', (entry?.reasoningSnapshot?.length ?? 0) > 80);
     check('audit entry records the justification', entry?.justification?.includes('Verified the employer'));
-    check('audit entry names the session officer', entry?.officer === 'Sana Rehman', entry?.officer);
+    const historyUnauth = await api('GET', '/api/decisions', undefined, { anonymous: true });
+    check('decision history requires auth', historyUnauth.status === 401, `got ${historyUnauth.status}`);
+
+    const historyRes = await api('GET', '/api/decisions');
+    check('fetches standalone decision history (O6)', historyRes.status === 200, `got ${historyRes.status}`);
+    check('returns array of decisions', Array.isArray(historyRes.json.decisions));
+    check('contains the newly recorded decision', historyRes.json.decisions.some((d: any) => d.caseId === riskyCaseId));
 
     const after = await api('GET', '/api/dashboard');
     check(

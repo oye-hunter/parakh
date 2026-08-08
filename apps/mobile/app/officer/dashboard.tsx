@@ -110,10 +110,15 @@ export default function Dashboard() {
         </View>
 
         {data ? (
-          <Card>
-            <Text variant="micro" style={{ marginBottom: space.md }}>
-              Risk distribution
-            </Text>
+          <Card style={{ gap: space.sm }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text variant="micro">Risk distribution</Text>
+              <Pressable onPress={() => router.push('/officer/history')} hitSlop={8}>
+                <Text variant="caption" style={{ textDecorationLine: 'underline', color: '#034f46' }}>
+                  Decision History
+                </Text>
+              </Pressable>
+            </View>
             <RiskDistribution distribution={data.distribution} />
           </Card>
         ) : null}

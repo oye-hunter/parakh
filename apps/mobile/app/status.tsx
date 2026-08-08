@@ -1,38 +1,114 @@
-import { View } from 'react-native';
+import { useState } from 'react';
+import { View, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { layout, space, surface } from '@parakh/tokens';
-
-import { Button, Text } from '@/ui';
+import { color, font, layout, radius, space, surface } from '@parakh/tokens';
+import { Button, StatusPill, Text } from '@/ui';
+import { lookupStatus, ApiError, type ApplicationStatusResult } from '@/lib/api';
 
 /**
- * A8 · Status.
+ * A8 · Application Status Lookup.
  *
- * Placeholder: looking up an application by reference needs a public,
- * rate-limited endpoint that returns a status and nothing else. Deliberately
- * not built yet — a careless version of it becomes an oracle for probing which
- * declarations pass, which is precisely what the applicant must not learn.
+ * Allows applicants to query status by reference number (e.g. PK-4471) or CNIC.
+ * Strict privacy boundary: Only reference, status, and submittedAt are displayed.
  */
-export default function Status() {
+export default function StatusScreen() {
   const insets = useSafeAreaInsets();
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<ApplicationStatusResult | null>(null);
+
+  async function handleLookup() {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      Alert.alert('Missing Input', 'Please enter a reference number or CNIC.');
+      return;
+    }
+    setLoading(true);
+    setResult(null);
+    try {
+      const isCnic = trimmed.includes('-') || /^\d{13}$/.test(trimmed);
+      const res = await lookupStatus(isCnic ? { cnic: trimmed } : { reference: trimmed });
+      setResult(res.application);
+    } catch (err: any) {
+      if (err instanceof ApiError) {
+        Alert.alert('Not Found', err.message || 'No application found.');
+      } else {
+        Alert.alert('Error', err.message || 'Unable to connect to server.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <View
       style={{
         flex: 1,
         backgroundColor: surface.applicant,
-        paddingTop: insets.top + space.huge,
+        paddingTop: insets.top + space.xl,
         paddingHorizontal: layout.gutter,
         paddingBottom: insets.bottom + space.lg,
       }}
     >
-      <Text variant="title">Check your status</Text>
-      <Text variant="body" tone="charcoal" style={{ marginTop: space.md, maxWidth: 340 }}>
-        Enter the reference number from your receipt to see where your application has reached.
+      <Text variant="title">Check status</Text>
+      <Text variant="body" tone="charcoal" style={{ marginTop: space.sm, marginBottom: space.lg }}>
+        Enter your reference number (e.g. PK-4471) or 13-digit CNIC to look up your application status.
       </Text>
-      <Text variant="caption" tone="fog" style={{ marginTop: space.lg }}>
-        Not built yet — see docs/03-USE-CASES.md, UC-2.
-      </Text>
+
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="PK-XXXX or 00000-0000000-0"
+        placeholderTextColor={color.fog}
+        autoCapitalize="characters"
+        autoCorrect={false}
+        style={{
+          height: 52,
+          backgroundColor: color.lumenCream,
+          borderRadius: radius.input,
+          borderWidth: 1,
+          borderColor: color.lumenStone,
+          paddingHorizontal: space.base,
+          fontFamily: font.data,
+          fontSize: 16,
+          color: color.vastInk,
+          marginBottom: space.md,
+        }}
+      />
+
+      <Button label={loading ? 'Searching...' : 'Lookup Application'} onPress={handleLookup} disabled={loading} />
+
+      {loading && <ActivityIndicator size="large" color={color.forestInk} style={{ marginTop: space.xl }} />}
+
+      {result && (
+        <View
+          style={{
+            marginTop: space.xl,
+            padding: space.lg,
+            backgroundColor: color.lumenCream,
+            borderRadius: radius.card,
+            borderWidth: 1,
+            borderColor: color.lumenStone,
+          }}
+        >
+          <Text variant="micro" tone="fog">Reference Number</Text>
+          <Text variant="data" style={{ fontSize: 20, marginVertical: space.xs, color: color.forestInk }}>
+            {result.reference}
+          </Text>
+
+          <View style={{ height: 1, backgroundColor: color.lumenStone, marginVertical: space.md }} />
+
+          <Text variant="micro" tone="fog" style={{ marginBottom: space.xs }}>Application Status</Text>
+          <View style={{ alignItems: 'flex-start' }}>
+            <StatusPill status={result.status as any} />
+          </View>
+
+          <Text variant="caption" tone="fog" style={{ marginTop: space.md }}>
+            Submitted on {new Date(result.submittedAt).toLocaleDateString()}
+          </Text>
+        </View>
+      )}
 
       <View style={{ flex: 1 }} />
       <Button label="Back to start" variant="outlined" onPress={() => router.replace('/')} />

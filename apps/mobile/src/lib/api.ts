@@ -250,3 +250,45 @@ export function getHealth() {
     { authenticated: false },
   );
 }
+
+export type ApplicationStatusResult = {
+  reference: string;
+  status: string;
+  submittedAt: string;
+};
+
+export function lookupStatus(query: { reference?: string; cnic?: string }) {
+  const param = query.reference
+    ? `reference=${encodeURIComponent(query.reference)}`
+    : `cnic=${encodeURIComponent(query.cnic ?? '')}`;
+  return request<{ success: boolean; application: ApplicationStatusResult }>(
+    `/api/applications/status?${param}`,
+    { authenticated: false },
+  );
+}
+
+export type DecisionHistoryItem = {
+  id: string;
+  caseId: string;
+  action: 'approve' | 'reject' | 'escalate';
+  justification: string;
+  riskSnapshot: string;
+  confidenceSnapshot: number;
+  reasoningSnapshot: string;
+  decidedAt: string;
+  officer?: { id: string; name: string; email: string; role: string };
+  case?: {
+    application?: {
+      reference: string;
+      fullName: string;
+      cnic: string;
+    };
+  };
+};
+
+export function getDecisions(limit = 50) {
+  return request<{ success: boolean; decisions: DecisionHistoryItem[] }>(
+    `/api/decisions?limit=${limit}`,
+  );
+}
+
