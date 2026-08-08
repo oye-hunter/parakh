@@ -1,0 +1,23 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# React Native's bundler cannot follow pnpm's symlinked, strictly-nested
+# node_modules: Metro resolves from a fixed list of directories, so a transitive
+# dependency like expo-modules-core (nested inside expo's own node_modules) is
+# invisible to it. Hoisted linking lays node_modules out the way npm does, and
+# is what the Expo docs recommend for pnpm workspaces.
+#
+# The trade is losing pnpm's strictness — a package can now import something it
+# never declared. Worth it; the alternative is an app that will not bundle.
+#
+# NOTE: this lives here rather than in .npmrc because pnpm 10+ reads it from the
+# workspace manifest. Setting it in .npmrc silently does nothing.
+nodeLinker: hoisted
+# esbuild ships a platform-specific binary that it installs in a postinstall
+# script. vitest and tsx both need it, so this must stay true.
+allowBuilds:
+  esbuild: true
+  # Next.js image optimisation. Not used by the API routes, but Next pulls it in
+  # and warns on every install if it stays unresolved.
+  sharp: true

@@ -1,0 +1,26 @@
+{
+  "name": "parakh",
+  "private": true,
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:push": "pnpm --filter @parakh/db push",
+    "db:seed": "pnpm --filter @parakh/db seed",
+    "db:studio": "pnpm --filter @parakh/db studio",
+    "test:api": "pnpm --filter @parakh/web test:api",
+    "smoke": "pnpm --filter @parakh/core smoke",
+    "health": "curl -s localhost:3000/api/health",
+    "provision:officers": "pnpm --filter @parakh/web provision:officers"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  }
+}
