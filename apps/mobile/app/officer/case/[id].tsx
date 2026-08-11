@@ -1,5 +1,14 @@
 import { useCallback, useState } from 'react';
-import { Modal, Pressable, ScrollView, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
@@ -259,58 +268,144 @@ export default function CaseDetailScreen() {
         />
       )}
 
-      {/* O5 · Decision sheet */}
-      <Modal visible={action !== null} transparent animationType="slide" onRequestClose={() => setAction(null)}>
-        <Pressable
-          style={{ flex: 1, backgroundColor: 'rgba(26,26,26,0.4)' }}
-          onPress={() => !busy && setAction(null)}
-        />
-        <View
+      {/* O5 · Floating Centered Decision Modal */}
+      <Modal
+        visible={action !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !busy && setAction(null)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{
-            backgroundColor: surface.card,
-            borderTopLeftRadius: radius.section,
-            borderTopRightRadius: radius.section,
-            borderWidth: border.heavy,
-            borderColor: color.vastInk,
+            flex: 1,
+            backgroundColor: 'rgba(26, 26, 26, 0.65)',
+            justifyContent: 'center',
+            alignItems: 'center',
             padding: layout.gutter,
-            paddingBottom: insets.bottom + space.lg,
-            gap: space.base,
           }}
         >
-          <Text variant="titleSm">{action ? ACTION_COPY[action].title : ''}</Text>
-
-          <Field
-            label="Justification"
-            value={justification}
-            onChangeText={setJustification}
-            placeholder="What did you verify, and what did you conclude?"
-            helper="Recorded in the audit trail. At least 10 characters."
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => !busy && setAction(null)}
           />
 
-          {error ? (
-            <Text variant="caption" tone="riskHigh">
-              {error}
-            </Text>
-          ) : null}
+          <View
+            style={{
+              width: '100%',
+              maxWidth: 380,
+              backgroundColor: surface.card,
+              borderRadius: radius.card,
+              borderWidth: 3,
+              borderColor:
+                action === 'approve'
+                  ? color.forestInk
+                  : action === 'reject'
+                  ? color.riskHigh
+                  : color.vastInk,
+              padding: space.lg,
+              gap: space.base,
+              elevation: 10,
+              shadowColor: color.vastInk,
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.25,
+              shadowRadius: 16,
+            }}
+          >
+            {/* Header Badge & Title */}
+            <View style={{ gap: 4 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text variant="micro" tone="fog">
+                  OFFICER VERDICT
+                </Text>
+                <View
+                  style={{
+                    borderRadius: radius.pill,
+                    paddingVertical: 3,
+                    paddingHorizontal: 8,
+                    backgroundColor:
+                      action === 'approve'
+                        ? color.forestInk
+                        : action === 'reject'
+                        ? color.riskHigh
+                        : color.vastInk,
+                  }}
+                >
+                  <Text variant="micro" style={{ color: color.lumenCream, fontSize: 10 }}>
+                    {action ? action.toUpperCase() : ''}
+                  </Text>
+                </View>
+              </View>
 
-          <View style={{ flexDirection: 'row', gap: space.sm }}>
-            <Button
-              label="Cancel"
-              variant="outlined"
-              onPress={() => setAction(null)}
-              disabled={busy}
-              style={{ flex: 1 }}
-            />
-            <Button
-              label={action ? ACTION_COPY[action].cta : ''}
-              variant={action ? ACTION_COPY[action].variant : 'primary'}
-              onPress={commit}
-              loading={busy}
-              disabled={justification.trim().length < 10}
-              style={{ flex: 1.4 }}
-            />
+              <Text variant="titleSm" style={{ marginTop: 2 }}>
+                {action ? ACTION_COPY[action].title : ''}
+              </Text>
+            </View>
+
+            {/* Justification Field */}
+            <View style={{ gap: 6 }}>
+              <Text variant="micro">Audit Justification</Text>
+              <TextInput
+                value={justification}
+                onChangeText={setJustification}
+                placeholder="What did you verify, and what did you conclude?"
+                placeholderTextColor={color.fog}
+                multiline
+                numberOfLines={3}
+                style={{
+                  backgroundColor: surface.inset,
+                  borderRadius: radius.input,
+                  borderWidth: border.field,
+                  borderColor: color.vastInk,
+                  paddingVertical: 12,
+                  paddingHorizontal: space.base,
+                  fontFamily: 'Archivo_400Regular',
+                  fontSize: 15,
+                  color: color.vastInk,
+                  minHeight: 84,
+                  textAlignVertical: 'top',
+                }}
+              />
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text variant="caption" tone="fog" style={{ fontSize: 12 }}>
+                  Recorded in immutable audit trail.
+                </Text>
+                <Text
+                  variant="caption"
+                  tone={justification.trim().length >= 10 ? 'forestInk' : 'fog'}
+                  style={{ fontSize: 12, fontFamily: 'JetBrainsMono_400Regular' }}
+                >
+                  {justification.trim().length}/10 min
+                </Text>
+              </View>
+            </View>
+
+            {error ? (
+              <Text variant="caption" tone="riskHigh">
+                {error}
+              </Text>
+            ) : null}
+
+            {/* Action Buttons */}
+            <View style={{ flexDirection: 'row', gap: space.sm, marginTop: space.xs }}>
+              <Button
+                label="Cancel"
+                variant="outlined"
+                onPress={() => setAction(null)}
+                disabled={busy}
+                style={{ flex: 1 }}
+              />
+              <Button
+                label={action ? ACTION_COPY[action].cta : ''}
+                variant={action ? ACTION_COPY[action].variant : 'primary'}
+                onPress={commit}
+                loading={busy}
+                disabled={justification.trim().length < 10}
+                style={{ flex: 1.4 }}
+              />
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
