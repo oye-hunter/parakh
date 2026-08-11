@@ -59,11 +59,12 @@ export function RiskBadge({
 
 /* ─────────────────────────── case status ─────────────────────────── */
 
-export type CaseStatus = 'pending' | 'edd_queue' | 'approved' | 'declined' | 'escalated';
+export type CaseStatus = 'pending' | 'edd_queue' | 'approved' | 'declined' | 'escalated' | 'under_review';
 
-const STATUS: Record<CaseStatus, { label: string; fill?: string; ink: string; border?: string }> = {
+const STATUS: Record<string, { label: string; fill?: string; ink: string; border?: string }> = {
   pending: { label: 'Pending', ink: color.fog, border: color.fog },
   edd_queue: { label: 'In EDD queue', ink: color.vastInk, border: color.vastInk },
+  under_review: { label: 'Under Review', ink: color.vastInk, border: color.vastInk },
   approved: { label: 'Approved', fill: color.forestInk, ink: color.lumenCream },
   declined: { label: 'Declined', ink: color.riskHigh, border: color.riskHigh },
   escalated: { label: 'Escalated', fill: color.vastInk, ink: color.lumenCream },
@@ -74,15 +75,19 @@ const STATUS: Record<CaseStatus, { label: string; fill?: string; ink: string; bo
  * — so filled pills are reserved for terminal states and everything else is an
  * outline.
  */
-export function StatusPill({ status }: { status: CaseStatus }) {
-  const s = STATUS[status];
+export function StatusPill({ status }: { status: CaseStatus | string }) {
+  const s = STATUS[status] ?? {
+    label: String(status ?? 'Pending').replace(/_/g, ' '),
+    ink: color.fog,
+    border: color.fog,
+  };
 
   return (
     <View
       style={[
         styles.pill,
         { paddingVertical: 5, paddingHorizontal: 12 },
-        s.fill ? { backgroundColor: s.fill } : { borderWidth: 1, borderColor: s.border },
+        s.fill ? { backgroundColor: s.fill } : { borderWidth: 1, borderColor: s.border ?? color.fog },
       ]}
     >
       <Text variant="caption" style={{ color: s.ink, fontSize: 12 }}>

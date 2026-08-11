@@ -1,12 +1,16 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { color, layout, space, surface } from '@parakh/tokens';
+import { color, layout, radius, space, surface } from '@parakh/tokens';
 
 import { Button, Text } from '@/ui';
 
-/** A1 · Welcome — the applicant's entry point. */
-export default function Welcome() {
+/**
+ * Root Entry Screen — Role Selection (Customer vs Compliance Officer).
+ *
+ * Provides a clean, elegant choice before entering the main flow.
+ */
+export default function RoleSelectionScreen() {
   const insets = useSafeAreaInsets();
 
   return (
@@ -19,66 +23,115 @@ export default function Welcome() {
           flexGrow: 1,
         }}
       >
-        <Text variant="micro">Parakh</Text>
+        <Text variant="micro">PARAKH · پرکھ</Text>
 
         <View style={{ marginTop: space.xxl }}>
-          <Text variant="title">Open your account</Text>
-          <Text variant="title">in five steps</Text>
-          {/* The one flourish in the whole applicant flow. */}
-          <View
-            style={{
-              height: 4,
-              width: 92,
-              backgroundColor: color.lavender,
-              borderRadius: 2,
-              marginTop: -4,
-              marginLeft: 2,
-            }}
-          />
+          <Text variant="title">Welcome to Parakh</Text>
+          <Text variant="body" tone="charcoal" style={{ marginTop: space.xs }}>
+            Please select your role to get started.
+          </Text>
         </View>
 
-        <Text variant="body" tone="charcoal" style={{ marginTop: space.base, maxWidth: 320 }}>
-          A few details about you and how you plan to use the account. It takes about three minutes.
-        </Text>
-
-        <View style={{ marginTop: space.xxl, gap: space.base }}>
-          {[
-            ['Your identity', 'CNIC and date of birth'],
-            ['Where you live', 'City, area, how long you have been there'],
-            ['Work and income', 'What you do and what you earn'],
-            ['How you will use it', 'Purpose and expected activity'],
-          ].map(([title, detail]) => (
-            <View key={title} style={{ flexDirection: 'row', gap: space.md, alignItems: 'flex-start' }}>
+        <View style={{ marginTop: space.xxl, gap: space.lg }}>
+          {/* Customer / Applicant Card */}
+          <View
+            style={{
+              backgroundColor: surface.card,
+              borderRadius: radius.card,
+              borderWidth: 2,
+              borderColor: color.vastInk,
+              padding: space.lg,
+              gap: space.md,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
               <View
                 style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 3,
-                  backgroundColor: color.vastInk,
-                  marginTop: 7,
+                  width: 42,
+                  height: 42,
+                  borderRadius: 12,
+                  backgroundColor: color.lavender,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderWidth: 1.5,
+                  borderColor: color.vastInk,
                 }}
-              />
+              >
+                <Text style={{ fontSize: 20 }}>👤</Text>
+              </View>
               <View style={{ flex: 1 }}>
-                <Text variant="bodySm" style={{ fontFamily: 'Archivo_600SemiBold' }}>
-                  {title}
+                <Text variant="subheading" style={{ fontFamily: 'Archivo_600SemiBold' }}>
+                  Customer / Applicant
                 </Text>
                 <Text variant="caption" tone="fog">
-                  {detail}
+                  Account Onboarding & Status
                 </Text>
               </View>
             </View>
-          ))}
+
+            <Text variant="bodySm" tone="charcoal">
+              Open a new digital account in five steps or check your existing application status.
+            </Text>
+
+            <Button
+              label="Continue as Customer →"
+              onPress={() => router.push('/apply/welcome')}
+            />
+          </View>
+
+          {/* Compliance Officer Card */}
+          <View
+            style={{
+              backgroundColor: surface.console,
+              borderRadius: radius.card,
+              borderWidth: 2,
+              borderColor: color.vastInk,
+              padding: space.lg,
+              gap: space.md,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+              <View
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 12,
+                  backgroundColor: color.vastInk,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text style={{ fontSize: 20 }}>🛡️</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text variant="subheading" style={{ fontFamily: 'Archivo_600SemiBold' }}>
+                  Compliance Officer
+                </Text>
+                <Text variant="caption" tone="fog">
+                  Risk Triage & Audit Portal
+                </Text>
+              </View>
+            </View>
+
+            <Text variant="bodySm" tone="charcoal">
+              Review flagged applications, AI risk reasoning, and audit decision history.
+            </Text>
+
+            <Button
+              label="Officer Sign in ›"
+              variant="outlined"
+              onPress={() => router.push('/officer/sign-in')}
+            />
+          </View>
         </View>
 
         <View style={{ flex: 1 }} />
 
-        <View style={{ marginTop: space.xxxl, gap: space.base }}>
-          <Button label="Get started" onPress={() => router.push('/apply/identity')} />
-          <Pressable onPress={() => router.push('/officer/sign-in')} hitSlop={10}>
-            <Text variant="caption" tone="fog" center>
-              Compliance officer sign in
-            </Text>
-          </Pressable>
+        {/* Footer simple text link */}
+        <View style={{ marginTop: space.xxl, alignItems: 'center' }}>
+          <Text variant="micro" tone="fog">
+            Parakh · Customer Risk Profiling & Compliance System
+          </Text>
         </View>
       </ScrollView>
     </View>

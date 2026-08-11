@@ -4,6 +4,7 @@ export { RiskBadge, StatusPill, type CaseStatus } from './Badge';
 export { Button, DecisionBar, type ButtonVariant } from './Button';
 export { EvidenceRow, ReasoningPanel } from './EvidenceRow';
 export { Field, Choice, Toggle, type ChoiceOption } from './Field';
+export { DatePickerField } from './DatePickerField';
 export {
   HeaderBand,
   StatTile,
