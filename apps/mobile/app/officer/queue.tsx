@@ -12,7 +12,7 @@ import {
 } from '@parakh/tokens';
 
 import { Card, HeaderBand, RiskBadge, StatusPill, Text } from '@/ui';
-import { getCases, type CaseListItem } from '@/lib/api';
+import { useCasesQuery } from '@/lib/queries';
 
 /**
  * `all` means every application, not every EDD-queue item.
@@ -51,26 +51,11 @@ function queryFor(filter: FilterKey): { status?: string; risk?: string } {
 export default function Queue() {
   const params = useLocalSearchParams<{ cluster?: string }>();
   const [filter, setFilter] = useState<FilterKey>('all');
-  const [items, setItems] = useState<CaseListItem[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      const res = await getCases(params.cluster ? { cluster: params.cluster } : queryFor(filter));
-      setItems(res.items);
-    } catch (err) {
-      if ((err as { status?: number }).status === 401) router.replace('/officer/sign-in');
-    }
-  }, [params.cluster, filter]);
+  const queryParams = params.cluster ? { cluster: params.cluster } : queryFor(filter);
+  const { data, isRefetching, refetch } = useCasesQuery(queryParams);
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load]),
-  );
-
-  // Cluster membership is a property of the signals, not something the list
-  // endpoint filters on, so that one stays client-side.
+  const items = data?.items ?? [];
   const visible = filter === 'clustered' ? items.filter((i) => Boolean(i.clusterRef)) : items;
 
   return (
@@ -135,12 +120,8 @@ export default function Queue() {
         contentContainerStyle={{ padding: layout.gutter, gap: space.md, paddingBottom: space.xxl }}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={async () => {
-              setRefreshing(true);
-              await load();
-              setRefreshing(false);
-            }}
+            refreshing={isRefetching}
+            onRefresh={() => void refetch()}
           />
         }
       >

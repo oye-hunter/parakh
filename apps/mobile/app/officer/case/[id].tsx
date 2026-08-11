@@ -60,46 +60,39 @@ const ACTION_COPY: Record<Action, { title: string; cta: string; variant: 'approv
   escalate: { title: 'Escalate for senior review?', cta: 'Escalate', variant: 'escalate' },
 };
 
+import { useCaseDetailQuery, useDecideMutation } from '@/lib/queries';
+
 /** O4 · Case detail, with the O5 decision sheet. */
 export default function CaseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
 
-  const [data, setData] = useState<CaseDetail | null>(null);
+  const { data, isPending: loading, error: queryError } = useCaseDetailQuery(id);
+  const decideMutation = useDecideMutation();
+
   const [showDeclaration, setShowDeclaration] = useState(false);
   const [action, setAction] = useState<Action | null>(null);
   const [justification, setJustification] = useState('');
-  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      setData(await getCase(id));
-    } catch (err) {
-      if ((err as { status?: number }).status === 401) router.replace('/officer/sign-in');
-      else setError('Could not load this case.');
-    }
-  }, [id]);
+  const busy = decideMutation.isPending;
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load]),
-  );
-
-  const commit = async () => {
+  const commit = () => {
     if (!action) return;
-    setBusy(true);
     setError(null);
-    try {
-      await decide({ caseId: id, action, justification: justification.trim() });
-      setAction(null);
-      setJustification('');
-      router.back();
-    } catch (err) {
-      setError((err as Error).message);
-      setBusy(false);
-    }
+    decideMutation.mutate(
+      { caseId: id, action, justification: justification.trim() },
+      {
+        onSuccess: () => {
+          setAction(null);
+          setJustification('');
+          router.back();
+        },
+        onError: (err: any) => {
+          setError(err.message || 'Could not commit decision.');
+        },
+      },
+    );
   };
 
   if (!data) {

@@ -12,46 +12,33 @@ import {
   StatTile,
   Text,
 } from '@/ui';
-import { getCases, getDashboard, type CaseListItem, type DashboardData } from '@/lib/api';
+import { useDashboardQuery, useCasesQuery } from '@/lib/queries';
 import { signOut } from '@/lib/auth-client';
 
 /** O2 · Dashboard — triage the day. */
 export default function Dashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [needsReview, setNeedsReview] = useState<CaseListItem[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data,
+    isPending: dashLoading,
+    isRefetching: dashRefetching,
+    refetch: refetchDash,
+    error: dashError,
+  } = useDashboardQuery();
 
-  const load = useCallback(async () => {
-    try {
-      setError(null);
-      const [dash, queue] = await Promise.all([
-        getDashboard(),
-        getCases({ status: 'edd_queue' }),
-      ]);
-      setData(dash);
-      setNeedsReview(queue.items.slice(0, 3));
-    } catch (err) {
-      // A 401 means the session expired while the app was backgrounded.
-      if ((err as { status?: number }).status === 401) {
-        router.replace('/officer/sign-in');
-        return;
-      }
-      setError('Could not load the dashboard.');
-    }
-  }, []);
+  const {
+    data: queueData,
+    isRefetching: queueRefetching,
+    refetch: refetchQueue,
+  } = useCasesQuery({ status: 'edd_queue' });
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load]),
-  );
+  const needsReview = (queueData?.items ?? []).slice(0, 3);
+  const refreshing = dashRefetching || queueRefetching;
 
   const onRefresh = async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
+    await Promise.all([refetchDash(), refetchQueue()]);
   };
+
+  const error = dashError ? 'Could not load the dashboard.' : null;
 
   const stats = data?.stats;
 

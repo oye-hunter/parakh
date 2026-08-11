@@ -232,12 +232,14 @@ export function getMe() {
   );
 }
 
-/** No officerId — identity comes from the session, never the body. */
-export function decide(input: {
+export type DecisionPayload = {
   caseId: string;
   action: 'approve' | 'reject' | 'escalate';
   justification: string;
-}) {
+};
+
+/** No officerId — identity comes from the session, never the body. */
+export function decide(input: DecisionPayload) {
   return request<{ caseId: string; status: string; decidedBy: string; decidedAt: string }>(
     '/api/decisions',
     { method: 'POST', body: JSON.stringify(input) },

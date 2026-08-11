@@ -4,44 +4,17 @@ import { router, useFocusEffect } from 'expo-router';
 import { color, layout, relativeTime, space, surface } from '@parakh/tokens';
 
 import { Card, HeaderBand, StatusPill, Text } from '@/ui';
-import { getDecisions, type DecisionHistoryItem } from '@/lib/api';
+import { useDecisionsQuery } from '@/lib/queries';
 
 /** O6 · Standalone Decision History / Audit Trail Screen. */
 export default function HistoryScreen() {
-  const [decisions, setDecisions] = useState<DecisionHistoryItem[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isPending, isRefetching, refetch, error: fetchError } = useDecisionsQuery();
 
-  const load = useCallback(async () => {
-    try {
-      setError(null);
-      const data = await getDecisions(50);
-      if (data.decisions) {
-        setDecisions(data.decisions);
-      }
-    } catch (err) {
-      if ((err as { status?: number }).status === 401) {
-        router.replace('/officer/sign-in');
-        return;
-      }
-      setError('Could not load decision history.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const decisions = data ?? [];
+  const refreshing = isRefetching;
+  const error = fetchError ? 'Could not load decision history.' : null;
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load])
-  );
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  };
+  const onRefresh = () => void refetch();
 
   return (
     <View style={{ flex: 1, backgroundColor: surface.console }}>
@@ -74,7 +47,7 @@ export default function HistoryScreen() {
           paddingBottom: space.xxl,
         }}
         ListEmptyComponent={
-          !loading ? (
+          !isPending ? (
             <Card>
               <Text variant="caption" tone="fog">
                 No past decisions recorded yet.
