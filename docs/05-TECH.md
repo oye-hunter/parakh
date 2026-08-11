@@ -11,14 +11,14 @@ Stack, monorepo layout, and the prompt to scaffold it.
 | Layer | Choice | Why |
 |---|---|---|
 | Monorepo | **pnpm workspaces + Turborepo** | Standard for Next.js + React Native side by side; pnpm's strict linking is what makes Metro behave |
-| Backend | **Next.js (App Router) Route Handlers** | API and officer console in one deployable; the AI key stays server-side |
-| Database | **Neon** (serverless Postgres) | Branchable, no infra, generous free tier, HTTP driver works from serverless handlers |
-| ORM | **Drizzle** | TypeScript-first, schema is the source of truth, `drizzle-kit push` skips migration ceremony |
-| Mobile | **React Native via Expo** | EAS Build produces the APK deliverable; Expo Router mirrors the Next.js file convention |
-| Mobile styling | **Design tokens + `StyleSheet` primitives** | No NativeWind — see below |
-| Web styling | **Tailwind v4** | Web only; `DESIGN.md` already ships a `@theme` block |
-| AI | **Google AI Studio (Gemini)** via `@google/generative-ai` | Called only from a Route Handler |
-| Charts | `victory-native` (mobile) · `recharts` (web) | |
+| Backend | **Next.js (App Router) Route Handlers** | API serverless routes; AI keys stay strictly server-side |
+| Database | **Neon** (serverless Postgres) | Branchable, no infra, HTTP driver works from serverless handlers |
+| ORM | **Drizzle** | TypeScript-first schema source of truth |
+| Mobile Framework | **React Native (0.86.2) via Expo SDK 57** | `expo-router` ~57.0.11 file-based routing |
+| Data Fetching | **TanStack Query v5** (`@tanstack/react-query`) | Stale-while-revalidate caching, instant screen navigation, and automatic cross-screen cache invalidation |
+| Mobile styling | **Design tokens + `StyleSheet` primitives** | Strict `@parakh/tokens` design token architecture — no NativeWind |
+| Web styling | **Tailwind v4** | Web only |
+| AI Agent | **Groq** (`llama-3.3-70b-versatile`) | Fast structured output risk scoring with deterministic signal engine fallback |
 
 ---
 
