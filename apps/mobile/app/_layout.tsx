@@ -10,7 +10,9 @@ import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold } from '@exp
 import { JetBrainsMono_400Regular, JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
 import { surface } from '@parakh/tokens';
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import { DraftContext, emptyDraft, type Draft } from '@/lib/draft';
+import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Already hidden — harmless on fast refresh.
@@ -58,19 +60,21 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError && !timedOut) return null;
 
   return (
-    <SafeAreaProvider>
-      <DraftContext.Provider value={draftValue}>
-        <View style={{ flex: 1, backgroundColor: surface.applicant }} onLayout={onReady}>
-          <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: surface.applicant },
-              animation: 'slide_from_right',
-            }}
-          />
-        </View>
-      </DraftContext.Provider>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <DraftContext.Provider value={draftValue}>
+          <View style={{ flex: 1, backgroundColor: surface.applicant }} onLayout={onReady}>
+            <StatusBar style="dark" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: surface.applicant },
+                animation: 'slide_from_right',
+              }}
+            />
+          </View>
+        </DraftContext.Provider>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }

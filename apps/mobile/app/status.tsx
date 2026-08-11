@@ -12,16 +12,22 @@ import { lookupStatus, ApiError, type ApplicationStatusResult } from '@/lib/api'
  * Allows applicants to query status by reference number (e.g. PK-4471) or CNIC.
  * Strict privacy boundary: Only reference, status, and submittedAt are displayed.
  */
+import { useStatusLookupQuery } from '@/lib/queries';
 import { formatCnic } from '@/lib/draft';
 
 export default function StatusScreen() {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ApplicationStatusResult | null>(null);
+  const [searchParams, setSearchParams] = useState<{ reference?: string; cnic?: string } | null>(null);
+
+  const { data, isFetching: loading, error: queryError } = useStatusLookupQuery(
+    searchParams ?? {},
+    Boolean(searchParams),
+  );
+
+  const result = data?.application ?? null;
 
   const handleQueryChange = (text: string) => {
-    // If user is typing a numeric CNIC, auto-dash it
     if (/^\d/.test(text.trim())) {
       setQuery(formatCnic(text));
     } else {
@@ -29,41 +35,21 @@ export default function StatusScreen() {
     }
   };
 
-  async function handleLookup() {
+  function handleLookup() {
     const trimmed = query.trim();
     if (!trimmed) {
       Alert.alert('Missing Input', 'Please enter a reference number or CNIC.');
       return;
     }
-    setLoading(true);
-    setResult(null);
-    try {
-      /**
-       * Both formats contain hyphens, so "has a hyphen" cannot tell them apart —
-       * an earlier version used that test and sent every reference number
-       * (PK-4413) to the CNIC lookup, which always 404'd.
-       *
-       * Match on shape instead: a CNIC is 13 digits, optionally grouped 5-7-1.
-       * Anything else is treated as a reference.
-       */
-      const digits = trimmed.replace(/\D/g, '');
-      const isCnic = /^\d{5}-\d{7}-\d$/.test(trimmed) || /^\d{13}$/.test(digits);
 
-      const res = await lookupStatus(
-        isCnic
-          ? { cnic: `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}` }
-          : { reference: trimmed.toUpperCase() },
-      );
-      setResult(res.application);
-    } catch (err: any) {
-      if (err instanceof ApiError) {
-        Alert.alert('Not Found', err.message || 'No application found.');
-      } else {
-        Alert.alert('Error', err.message || 'Unable to connect to server.');
-      }
-    } finally {
-      setLoading(false);
-    }
+    const digits = trimmed.replace(/\D/g, '');
+    const isCnic = /^\d{5}-\d{7}-\d$/.test(trimmed) || /^\d{13}$/.test(digits);
+
+    setSearchParams(
+      isCnic
+        ? { cnic: `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}` }
+        : { reference: trimmed.toUpperCase() },
+    );
   }
 
   return (
