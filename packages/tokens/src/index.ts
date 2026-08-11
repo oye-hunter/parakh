@@ -76,19 +76,19 @@ export const font = {
  * The type scale. `lineHeight` and `letterSpacing` are absolute pixels.
  */
 export const type = {
-  micro: { fontFamily: font.uiSemi, fontSize: 11, lineHeight: 13, letterSpacing: 1.1 },
-  caption: { fontFamily: font.ui, fontSize: 13, lineHeight: 18 },
-  bodySm: { fontFamily: font.ui, fontSize: 15, lineHeight: 20 },
-  body: { fontFamily: font.ui, fontSize: 16, lineHeight: 22 },
+  micro: { fontFamily: font.uiSemi, fontSize: 11, lineHeight: 15, letterSpacing: 1.1 },
+  caption: { fontFamily: font.ui, fontSize: 13, lineHeight: 19 },
+  bodySm: { fontFamily: font.ui, fontSize: 15, lineHeight: 22 },
+  body: { fontFamily: font.ui, fontSize: 16, lineHeight: 24 },
   /** The AI reasoning paragraph — the one place with generous leading. */
   reasoning: { fontFamily: font.ui, fontSize: 16, lineHeight: 26 },
-  subheading: { fontFamily: font.uiSemi, fontSize: 18, lineHeight: 23 },
-  titleSm: { fontFamily: font.display, fontSize: 22, lineHeight: 26, letterSpacing: -0.4 },
-  title: { fontFamily: font.display, fontSize: 28, lineHeight: 31, letterSpacing: -0.7 },
-  titleLg: { fontFamily: font.display, fontSize: 32, lineHeight: 34, letterSpacing: -0.9 },
-  figure: { fontFamily: font.display, fontSize: 40, lineHeight: 40, letterSpacing: -1 },
-  dataSm: { fontFamily: font.data, fontSize: 13, lineHeight: 18 },
-  data: { fontFamily: font.dataMedium, fontSize: 15, lineHeight: 21 },
+  subheading: { fontFamily: font.uiSemi, fontSize: 18, lineHeight: 26 },
+  titleSm: { fontFamily: font.display, fontSize: 22, lineHeight: 28, letterSpacing: -0.4 },
+  title: { fontFamily: font.display, fontSize: 28, lineHeight: 34, letterSpacing: -0.7 },
+  titleLg: { fontFamily: font.display, fontSize: 32, lineHeight: 38, letterSpacing: -0.9 },
+  figure: { fontFamily: font.display, fontSize: 40, lineHeight: 46, letterSpacing: -1 },
+  dataSm: { fontFamily: font.data, fontSize: 13, lineHeight: 19 },
+  data: { fontFamily: font.dataMedium, fontSize: 15, lineHeight: 22 },
 } as const;
 
 export type TypeVariant = keyof typeof type;

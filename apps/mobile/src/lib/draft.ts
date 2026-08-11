@@ -35,11 +35,12 @@ export function useDraft(): DraftContextValue {
 
 export const CNIC_PATTERN = /^\d{5}-\d{7}-\d$/;
 
-/** `3740512345671` → `37405-1234567-1`, as the user types. */
 export function formatCnic(input: string): string {
   const digits = input.replace(/\D/g, '').slice(0, 13);
-  const parts = [digits.slice(0, 5), digits.slice(5, 12), digits.slice(12, 13)].filter(Boolean);
-  return parts.join('-');
+  if (!digits) return '';
+  if (digits.length <= 5) return digits;
+  if (digits.length <= 12) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
 }
 
 /** `2005-3-7` → `2005-03-07`; returns null if it is not a plausible date. */

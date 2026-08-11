@@ -54,6 +54,8 @@ export interface FieldProps {
   style?: ViewStyle;
 }
 
+import { formatCnic } from '@/lib/draft';
+
 export function Field({
   label,
   value,
@@ -70,12 +72,23 @@ export function Field({
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
 
+  const handleTextChange = (text: string) => {
+    const isCnicField =
+      label.toLowerCase().includes('cnic') ||
+      placeholder?.includes('00000-0000000-0');
+    if (isCnicField) {
+      onChangeText(formatCnic(text));
+    } else {
+      onChangeText(text);
+    }
+  };
+
   return (
     <View style={[styles.wrap, style]}>
       <Text variant="micro">{label}</Text>
       <TextInput
         value={value}
-        onChangeText={onChangeText}
+        onChangeText={handleTextChange}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder={placeholder}
