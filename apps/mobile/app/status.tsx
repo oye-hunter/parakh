@@ -12,11 +12,22 @@ import { lookupStatus, ApiError, type ApplicationStatusResult } from '@/lib/api'
  * Allows applicants to query status by reference number (e.g. PK-4471) or CNIC.
  * Strict privacy boundary: Only reference, status, and submittedAt are displayed.
  */
+import { formatCnic } from '@/lib/draft';
+
 export default function StatusScreen() {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ApplicationStatusResult | null>(null);
+
+  const handleQueryChange = (text: string) => {
+    // If user is typing a numeric CNIC, auto-dash it
+    if (/^\d/.test(text.trim())) {
+      setQuery(formatCnic(text));
+    } else {
+      setQuery(text);
+    }
+  };
 
   async function handleLookup() {
     const trimmed = query.trim();
@@ -72,7 +83,7 @@ export default function StatusScreen() {
 
       <TextInput
         value={query}
-        onChangeText={setQuery}
+        onChangeText={handleQueryChange}
         placeholder="PK-XXXX or 00000-0000000-0"
         placeholderTextColor={color.fog}
         autoCapitalize="characters"

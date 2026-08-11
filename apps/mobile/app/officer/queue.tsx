@@ -86,41 +86,49 @@ export default function Queue() {
       />
 
       {!params.cluster && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            flexDirection: 'row',
-            gap: space.sm,
-            paddingHorizontal: layout.gutter,
-            paddingTop: space.base,
-          }}
-        >
-          {FILTERS.map((f) => {
-            const active = f.key === filter;
-            return (
-              <Pressable
-                key={f.key}
-                onPress={() => setFilter(f.key)}
-                style={{
-                  borderRadius: radius.pill,
-                  borderWidth: active ? border.heavy : border.hair,
-                  borderColor: color.vastInk,
-                  backgroundColor: active ? color.vastInk : 'transparent',
-                  paddingVertical: 7,
-                  paddingHorizontal: 14,
-                }}
-              >
-                <Text
-                  variant="caption"
-                  style={{ color: active ? color.lumenCream : color.vastInk }}
+        <View style={{ height: 50, maxHeight: 50, flexGrow: 0, marginTop: space.sm }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              flexDirection: 'row',
+              gap: space.sm,
+              paddingHorizontal: layout.gutter,
+              alignItems: 'center',
+            }}
+          >
+            {FILTERS.map((f) => {
+              const active = f.key === filter;
+              return (
+                <Pressable
+                  key={f.key}
+                  onPress={() => setFilter(f.key)}
+                  style={{
+                    borderRadius: radius.pill,
+                    borderWidth: active ? border.heavy : border.hair,
+                    borderColor: color.vastInk,
+                    backgroundColor: active ? color.vastInk : 'transparent',
+                    paddingVertical: 6,
+                    paddingHorizontal: 14,
+                    height: 34,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
                 >
-                  {f.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+                  <Text
+                    variant="caption"
+                    style={{
+                      color: active ? color.lumenCream : color.vastInk,
+                      lineHeight: 18,
+                    }}
+                  >
+                    {f.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
       )}
 
       <ScrollView

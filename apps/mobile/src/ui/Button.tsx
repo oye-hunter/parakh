@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.button,
     borderWidth: border.heavy,
     minHeight: layout.tapTargetMin + 4,
+    paddingVertical: 12,
     paddingHorizontal: space.lg,
     alignItems: 'center',
     justifyContent: 'center',
