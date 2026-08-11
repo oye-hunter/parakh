@@ -114,6 +114,9 @@ importers:
       '@parakh/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@tanstack/react-query':
+        specifier: ^5.67.0
+        version: 5.101.4(react@19.2.8)
       better-auth:
         specifier: ^1.6.26
         version: 1.6.26(next@15.5.23(@babel/core@7.29.7(supports-color@8.1.1))(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(vitest@2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(supports-color@8.1.1)(terser@5.49.2))
@@ -6941,6 +6944,11 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.101.4
       react: 19.2.3
+
+  '@tanstack/react-query@5.101.4(react@19.2.8)':
+    dependencies:
+      '@tanstack/query-core': 5.101.4
+      react: 19.2.8
 
   '@testing-library/dom@10.4.1':
     dependencies:
