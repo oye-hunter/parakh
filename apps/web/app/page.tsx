@@ -71,7 +71,8 @@ interface DecisionHistoryItem {
 /* ────────────────────────── API Helpers ────────────────────────── */
 
 async function fetchDashboard(): Promise<DashboardData> {
-  const res = await fetch('/api/dashboard');
+  const res = await fetch('/api/dashboard', { credentials: 'include' });
+  if (res.status === 401) throw new Error('unauthenticated');
   if (!res.ok) throw new Error('Failed to load dashboard');
   return res.json();
 }
@@ -80,13 +81,15 @@ async function fetchCases(params?: { status?: string; risk?: string }): Promise<
   const q = new URLSearchParams();
   if (params?.status) q.set('status', params.status);
   if (params?.risk) q.set('risk', params.risk);
-  const res = await fetch(`/api/cases${q.toString() ? `?${q.toString()}` : ''}`);
+  const res = await fetch(`/api/cases${q.toString() ? `?${q.toString()}` : ''}`, { credentials: 'include' });
+  if (res.status === 401) throw new Error('unauthenticated');
   if (!res.ok) throw new Error('Failed to load cases');
   return res.json();
 }
 
 async function fetchDecisions(): Promise<{ decisions: DecisionHistoryItem[] }> {
-  const res = await fetch('/api/decisions?limit=100');
+  const res = await fetch('/api/decisions?limit=100', { credentials: 'include' });
+  if (res.status === 401) throw new Error('unauthenticated');
   if (!res.ok) throw new Error('Failed to load decisions');
   return res.json();
 }
@@ -94,9 +97,14 @@ async function fetchDecisions(): Promise<{ decisions: DecisionHistoryItem[] }> {
 async function submitDecision(payload: { caseId: string; action: 'approve' | 'reject' | 'escalate'; justification: string }) {
   const res = await fetch('/api/decisions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Origin': typeof window !== 'undefined' ? window.location.origin : '',
+    },
     body: JSON.stringify(payload),
+    credentials: 'include',
   });
+  if (res.status === 401) throw new Error('unauthenticated');
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Failed to submit decision');
@@ -120,6 +128,11 @@ function relativeTime(iso: string): string {
 export default function AdminPortal() {
   const queryClient = useQueryClient();
 
+  const [email, setEmail] = useState('sana.rehman@parakh.pk');
+  const [password, setPassword] = useState('parakh-demo-2026');
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const [activeTab, setActiveTab] = useState<'escalations' | 'audit' | 'overview'>('escalations');
   const [auditFilter, setAuditFilter] = useState<'all' | 'approve' | 'reject' | 'escalate'>('all');
   const [selectedCase, setSelectedCase] = useState<CaseListItem | null>(null);
@@ -128,20 +141,78 @@ export default function AdminPortal() {
   const [modalError, setModalError] = useState<string | null>(null);
 
   /* Queries */
-  const { data: dashData, isLoading: dashLoading } = useQuery({
+  const { data: dashData, isLoading: dashLoading, error: dashError } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboard,
+    retry: false,
   });
 
-  const { data: casesData, isLoading: casesLoading } = useQuery({
+  const { data: casesData, isLoading: casesLoading, error: casesError } = useQuery({
     queryKey: ['cases'],
     queryFn: () => fetchCases(),
+    retry: false,
   });
 
-  const { data: decisionsData, isLoading: decisionsLoading } = useQuery({
+  const { data: decisionsData, isLoading: decisionsLoading, error: decisionsError } = useQuery({
     queryKey: ['decisions'],
     queryFn: fetchDecisions,
+    retry: false,
   });
+
+  const isUnauthenticated =
+    dashError?.message === 'unauthenticated' ||
+    casesError?.message === 'unauthenticated' ||
+    decisionsError?.message === 'unauthenticated';
+
+  /* Handlers */
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setAuthBusy(true);
+    setAuthError(null);
+    try {
+      const res = await fetch('/api/auth/sign-in/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': typeof window !== 'undefined' ? window.location.origin : '',
+        },
+        body: JSON.stringify({ email: email.trim(), password }),
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setAuthError(err.message || 'Incorrect email or password for compliance console.');
+        setAuthBusy(false);
+        return;
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+        queryClient.invalidateQueries({ queryKey: ['cases'] }),
+        queryClient.invalidateQueries({ queryKey: ['decisions'] }),
+      ]);
+    } catch {
+      setAuthError('Could not connect to authentication server.');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/sign-out', {
+        method: 'POST',
+        headers: {
+          'Origin': typeof window !== 'undefined' ? window.location.origin : '',
+        },
+        credentials: 'include',
+      });
+    } finally {
+      queryClient.clear();
+    }
+  };
 
   /* Decision Mutation */
   const decideMutation = useMutation({
@@ -194,6 +265,84 @@ export default function AdminPortal() {
     });
   };
 
+  if (isUnauthenticated) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#f2efdc', color: '#1a1a1a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffeb', borderRadius: 24, border: '2px solid #1a1a1a', padding: 32, display: 'flex', flexDirection: 'column', gap: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8a8a80', fontWeight: 700 }}>
+              PARAKH · COMPLIANCE ADMIN
+            </div>
+            <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 28, margin: '6px 0 4px', fontWeight: 600 }}>
+              Senior Officer Sign In
+            </h1>
+            <p style={{ fontSize: 13, color: '#8a8a80', margin: 0 }}>
+              Sign in with an authorized officer account to access the audit & triage console.
+            </p>
+          </div>
+
+          <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1a1a' }}>
+                Officer Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="sana.rehman@parakh.pk"
+                required
+                style={{ backgroundColor: '#e4e4d0', borderRadius: 12, border: '1.5px solid #1a1a1a', padding: '12px 14px', fontFamily: "'Archivo', sans-serif", fontSize: 15, color: '#1a1a1a', outline: 'none' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1a1a' }}>
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                style={{ backgroundColor: '#e4e4d0', borderRadius: 12, border: '1.5px solid #1a1a1a', padding: '12px 14px', fontFamily: "'Archivo', sans-serif", fontSize: 15, color: '#1a1a1a', outline: 'none' }}
+              />
+            </div>
+
+            {authError && (
+              <div style={{ padding: '10px 12px', borderRadius: 8, border: '1.5px solid #a8322a', backgroundColor: '#ffffeb', color: '#a8322a', fontSize: 13, fontWeight: 500 }}>
+                {authError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={authBusy || !email || !password}
+              style={{ backgroundColor: '#034f46', color: '#ffffeb', border: '2px solid #1a1a1a', borderRadius: 12, padding: '14px', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginTop: 4 }}
+            >
+              {authBusy ? 'Authenticating…' : 'Sign In to Console'}
+            </button>
+          </form>
+
+          <div style={{ paddingTop: 12, borderTop: '1px solid #e4e4d0', fontSize: 12, color: '#8a8a80', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Demo credentials prefilled</span>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('sana.rehman@parakh.pk');
+                setPassword('parakh-demo-2026');
+              }}
+              style={{ background: 'none', border: 'none', color: '#034f46', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+            >
+              Use Sana Rehman
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f2efdc', color: '#1a1a1a' }}>
       {/* ── Header Band ── */}
@@ -231,6 +380,20 @@ export default function AdminPortal() {
           >
             Senior Officer Active
           </span>
+          <button
+            onClick={handleSignOut}
+            style={{
+              background: 'transparent',
+              border: '1px solid #8a8a80',
+              borderRadius: 9999,
+              padding: '4px 12px',
+              color: '#ffffeb',
+              fontSize: 12,
+              cursor: 'pointer',
+            }}
+          >
+            Sign out
+          </button>
         </div>
       </header>
 
