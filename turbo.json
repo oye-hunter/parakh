@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["DATABASE_URL", "GROQ_API_KEY", "GROQ_MODEL", "NODE_ENV"],
+  "globalEnv": ["DATABASE_URL", "GROQ_API_KEY", "GROQ_MODEL", "NODE_ENV", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL", "EXPO_PUBLIC_API_URL"],
   "tasks": {
     "dev": {
       "cache": false,

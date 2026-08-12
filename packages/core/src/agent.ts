@@ -1,14 +1,14 @@
 import Groq from 'groq-sdk';
 
-import { buildPrompt, SYSTEM_PROMPT } from './prompt.js';
-import { RiskProfileSchema, type RiskProfileOutput } from './risk.js';
-import { fallbackRiskLevel } from './signals.js';
+import { buildPrompt, SYSTEM_PROMPT } from './prompt';
+import { RiskProfileSchema, type RiskProfileOutput } from './risk';
+import { fallbackRiskLevel } from './signals';
 import type {
   ApplicationInput,
   ContributingSignal,
   RiskProfileResult,
   Signal,
-} from './types.js';
+} from './types';
 
 /**
  * Groq model id.

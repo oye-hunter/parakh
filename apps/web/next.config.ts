@@ -1,30 +1,28 @@
 import type { NextConfig } from 'next';
 
-/**
- * The workspace packages are pure ESM TypeScript with no build step, so their
- * relative imports carry explicit `.js` extensions — which is what Node and tsx
- * require. Bundlers do not make that mapping on their own, so both resolvers
- * need to be told that `./schema.js` may mean `./schema.ts`.
- */
 const extensionAlias = {
   '.js': ['.ts', '.tsx', '.js'],
   '.mjs': ['.mts', '.mjs'],
 };
 
-const config: NextConfig & { eslint?: { ignoreDuringBuilds?: boolean } } = {
-  // Ignore ESLint and TypeScript errors during production build for deployment
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+const config: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
 
-  // Raw TypeScript in, so Next has to transpile it itself.
   transpilePackages: ['@parakh/core', '@parakh/db'],
 
   turbopack: {
-    resolveAlias: {},
+    resolveAlias: {
+      './env.js': './env.ts',
+      './schema.js': './schema.ts',
+      './client.js': './client.ts',
+      './types.js': './types.ts',
+      './prompt.js': './prompt.ts',
+      './risk.js': './risk.ts',
+      './signals.js': './signals.ts',
+      './agent.js': './agent.ts',
+    },
     resolveExtensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.json'],
   },
 

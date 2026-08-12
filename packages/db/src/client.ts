@@ -1,12 +1,12 @@
 // Must be first: loads the root .env before anything below reads process.env.
-import './env.js';
+import './env';
 
 import { neon, Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { drizzle as drizzleWs } from 'drizzle-orm/neon-serverless';
 import ws from 'ws';
 
-import * as schema from './schema.js';
+import * as schema from './schema';
 
 function connectionString(): string {
   const url = process.env.DATABASE_URL;
