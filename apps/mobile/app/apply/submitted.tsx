@@ -1,6 +1,7 @@
-import { View } from 'react-native';
+import { useCallback } from 'react';
+import { BackHandler, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { color, layout, radius, space, surface } from '@parakh/tokens';
 
 import { Button, StatusPill, Text } from '@/ui';
@@ -15,6 +16,25 @@ import { Button, StatusPill, Text } from '@/ui';
 export default function Submitted() {
   const insets = useSafeAreaInsets();
   const { reference } = useLocalSearchParams<{ reference: string }>();
+
+  const goHome = useCallback(() => {
+    if (router.canDismiss()) {
+      router.dismissAll();
+    }
+    router.replace('/');
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        goHome();
+        return true; // Intercept hardware back button
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [goHome]),
+  );
 
   return (
     <View
@@ -66,8 +86,16 @@ export default function Submitted() {
       <View style={{ flex: 1 }} />
 
       <View style={{ gap: space.md }}>
-        <Button label="Check status" onPress={() => router.replace('/status')} />
-        <Button label="Back to start" variant="outlined" onPress={() => router.replace('/')} />
+        <Button
+          label="Check status"
+          onPress={() => {
+            if (router.canDismiss()) {
+              router.dismissAll();
+            }
+            router.replace('/status');
+          }}
+        />
+        <Button label="Back to start" variant="outlined" onPress={goHome} />
       </View>
     </View>
   );
