@@ -11,7 +11,7 @@ const extensionAlias = {
   '.mjs': ['.mts', '.mjs'],
 };
 
-const config: NextConfig = {
+const config: NextConfig & { eslint?: { ignoreDuringBuilds?: boolean } } = {
   // Ignore ESLint and TypeScript errors during production build for deployment
   eslint: {
     ignoreDuringBuilds: true,
