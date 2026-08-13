@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import Providers from './providers';
 
 export const metadata = {
-  title: 'Parakh Admin · Senior Officer Audit & Triage Console',
-  description: 'Every judgment, explained.',
+  title: 'Parakh — AI Customer Risk Profiling & Mobile App',
+  description: 'Every judgment, explained. AI-driven customer risk profiling for digital onboarding.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

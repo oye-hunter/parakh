@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Navbar from '@/components/landing/Navbar';
+import HeroSection from '@/components/landing/HeroSection';
+import RiskSimulator from '@/components/landing/RiskSimulator';
+import FeatureShowcase from '@/components/landing/FeatureShowcase';
+import DownloadPortal from '@/components/landing/DownloadPortal';
+import AppDownloadModal from '@/components/landing/AppDownloadModal';
+import Footer from '@/components/landing/Footer';
 
 /* ────────────────────────── Types ────────────────────────── */
 
@@ -127,6 +134,9 @@ function relativeTime(iso: string): string {
 
 export default function AdminPortal() {
   const queryClient = useQueryClient();
+
+  const [view, setView] = useState<'landing' | 'console'>('landing');
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
 
   const [email, setEmail] = useState('sana.rehman@parakh.pk');
   const [password, setPassword] = useState('parakh-demo-2026');
@@ -265,21 +275,45 @@ export default function AdminPortal() {
     });
   };
 
+  if (view === 'landing') {
+    return (
+      <main style={{ background: '#f2efdc', minHeight: '100vh', color: '#1a1a1a' }}>
+        <Navbar
+          onOpenDownload={() => setIsDownloadOpen(true)}
+          onToggleConsole={() => setView('console')}
+          isConsoleActive={false}
+        />
+        <HeroSection onOpenDownload={() => setIsDownloadOpen(true)} />
+        <RiskSimulator />
+        <FeatureShowcase />
+        <DownloadPortal onOpenDownload={() => setIsDownloadOpen(true)} />
+        <Footer />
+        <AppDownloadModal isOpen={isDownloadOpen} onClose={() => setIsDownloadOpen(false)} />
+      </main>
+    );
+  }
+
   if (isUnauthenticated) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#f2efdc', color: '#1a1a1a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-        <div style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffeb', borderRadius: 24, border: '2px solid #1a1a1a', padding: 32, display: 'flex', flexDirection: 'column', gap: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-          <div>
+        <div style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffeb', borderRadius: 24, border: '2px solid #1a1a1a', padding: 32, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8a8a80', fontWeight: 700 }}>
               PARAKH · COMPLIANCE ADMIN
             </div>
-            <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 28, margin: '6px 0 4px', fontWeight: 600 }}>
-              Senior Officer Sign In
-            </h1>
-            <p style={{ fontSize: 13, color: '#8a8a80', margin: 0 }}>
-              Sign in with an authorized officer account to access the audit & triage console.
-            </p>
+            <button
+              onClick={() => setView('landing')}
+              style={{ background: 'none', border: 'none', color: '#1a1a1a', cursor: 'pointer', fontSize: 13, fontWeight: 600, textDecoration: 'underline' }}
+            >
+              ← Landing
+            </button>
           </div>
+          <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 28, margin: '6px 0 4px', fontWeight: 600 }}>
+            Senior Officer Sign In
+          </h1>
+          <p style={{ fontSize: 13, color: '#8a8a80', margin: 0 }}>
+            Sign in with an authorized officer account to access the audit & triage console.
+          </p>
 
           <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -367,6 +401,21 @@ export default function AdminPortal() {
         </div>
 
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            onClick={() => setView('landing')}
+            style={{
+              backgroundColor: '#ffffeb',
+              color: '#1a1a1a',
+              border: '1.5px solid #ffffeb',
+              borderRadius: 8,
+              padding: '6px 14px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            ← Landing Page
+          </button>
           <span
             style={{
               padding: '4px 12px',
