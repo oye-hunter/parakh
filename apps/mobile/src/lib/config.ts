@@ -16,6 +16,11 @@ function inferHost(): string {
   const explicit = process.env.EXPO_PUBLIC_API_URL;
   if (explicit) return explicit.replace(/\/$/, '');
 
+  // Standalone production release fallback
+  if (!__DEV__) {
+    return 'https://parakh-webapp.vercel.app';
+  }
+
   // Android emulator maps the host machine to a fixed address.
   if (Platform.OS === 'android' && !Constants.expoConfig?.hostUri) {
     return 'http://10.0.2.2:3000';

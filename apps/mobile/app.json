@@ -7,9 +7,9 @@
     "scheme": "parakh",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "icon": "./assets/icon.png",
+    "icon": "./assets/parakh.png",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/parakh.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffeb"
     },
@@ -20,13 +20,13 @@
     "android": {
       "package": "pk.parakh.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/parakh.png",
         "backgroundColor": "#ffffeb"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/parakh.png",
       "bundler": "metro",
       "output": "single"
     },
@@ -37,6 +37,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "459dacca-8a7d-4dc7-a787-6dad3a8bbb76"
+      }
     }
   }
 }
