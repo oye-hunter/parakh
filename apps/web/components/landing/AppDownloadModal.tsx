@@ -30,12 +30,14 @@ export default function AppDownloadModal({ isOpen, onClose }: Props) {
           background: '#ffffeb',
           border: '2px solid #1a1a1a',
           borderRadius: 24,
-          padding: 32,
+          padding: 'clamp(20px, 4vw, 32px)',
           maxWidth: 460,
           width: '100%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
           boxSizing: 'border-box',
           position: 'relative',
-          boxShadow: '8px 8px 0px #1a1a1a',
+          boxShadow: '6px 6px 0px #1a1a1a',
         }}
       >
         <button

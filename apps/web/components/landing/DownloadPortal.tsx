@@ -85,29 +85,43 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
     const ctx = gsap.context(() => {
       if (!sectionRef.current) return;
 
-      gsap.from(leftColRef.current, {
-        opacity: 0,
-        x: -40,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 75%',
-          toggleActions: 'play none none none',
-        },
-      });
+      if (leftColRef.current) {
+        gsap.fromTo(
+          leftColRef.current,
+          { opacity: 0.3, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            clearProps: 'all',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }
 
-      gsap.from(phoneMockupRef.current, {
-        opacity: 0,
-        x: 40,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 75%',
-          toggleActions: 'play none none none',
-        },
-      });
+      if (phoneMockupRef.current) {
+        gsap.fromTo(
+          phoneMockupRef.current,
+          { opacity: 0.3, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            clearProps: 'all',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -120,18 +134,30 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
       style={{
         background: '#f2efdc',
         borderBottom: '2px solid #1a1a1a',
-        padding: '88px 24px',
+        padding: 'clamp(44px, 6vw, 88px) clamp(16px, 4vw, 24px)',
         position: 'relative',
       }}
     >
+      <style>{`
+        .portal-layout-grid {
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 48px;
+          align-items: center;
+        }
+        @media (max-width: 860px) {
+          .portal-layout-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+          }
+        }
+      `}</style>
+
       <div
+        className="portal-layout-grid"
         style={{
           maxWidth: 1200,
           margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: '1.1fr 0.9fr',
-          gap: 56,
-          alignItems: 'center',
         }}
       >
         {/* Left Column Copy & QR code download */}
@@ -150,7 +176,7 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
               fontWeight: 600,
               letterSpacing: '0.10em',
               textTransform: 'uppercase',
-              marginBottom: 16,
+              marginBottom: 14,
             }}
           >
             NATIVE ANDROID EXPERIENCE
@@ -159,7 +185,7 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
           <h2
             style={{
               fontFamily: "'Fraunces', Georgia, serif",
-              fontSize: 42,
+              fontSize: 'clamp(28px, 6vw, 42px)',
               fontWeight: 600,
               color: '#1a1a1a',
               margin: '0 0 16px 0',

@@ -96,13 +96,13 @@ export default function FeatureShowcase() {
       style={{
         background: '#ffffeb',
         borderBottom: '2px solid #1a1a1a',
-        padding: '88px 24px',
+        padding: 'clamp(44px, 6vw, 88px) clamp(16px, 4vw, 24px)',
         position: 'relative',
       }}
     >
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         {/* Section Title */}
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <div
             style={{
               display: 'inline-flex',
@@ -117,7 +117,7 @@ export default function FeatureShowcase() {
               fontWeight: 600,
               letterSpacing: '0.10em',
               textTransform: 'uppercase',
-              marginBottom: 16,
+              marginBottom: 14,
             }}
           >
             END-TO-END PIPELINE ARCHITECTURE
@@ -125,7 +125,7 @@ export default function FeatureShowcase() {
           <h2
             style={{
               fontFamily: "'Fraunces', Georgia, serif",
-              fontSize: 40,
+              fontSize: 'clamp(28px, 6vw, 40px)',
               fontWeight: 600,
               color: '#1a1a1a',
               margin: '0 0 12px 0',
@@ -134,7 +134,7 @@ export default function FeatureShowcase() {
           >
             How Parakh Governs Risk in Real-Time
           </h2>
-          <p style={{ fontSize: 16, color: '#444444', margin: 0, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
+          <p style={{ fontSize: 15, color: '#444444', margin: 0, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
             Four interconnected inspection layers built for rapid digital customer onboarding and uncompromising compliance governance. Click any stage below to inspect its live operational workbench.
           </p>
         </div>
@@ -146,28 +146,28 @@ export default function FeatureShowcase() {
             background: '#ffa946',
             border: '2px solid #1a1a1a',
             borderRadius: 20,
-            padding: '20px 28px',
-            marginBottom: 40,
+            padding: '16px 22px',
+            marginBottom: 36,
             boxShadow: '4px 4px 0 #1a1a1a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: 16,
+            gap: 14,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div
               style={{
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 borderRadius: '50%',
                 backgroundColor: '#1a1a1a',
                 color: '#ffffeb',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: 700,
                 flexShrink: 0,
               }}
@@ -186,7 +186,7 @@ export default function FeatureShowcase() {
               >
                 LIVE CROSS-APPLICATION GRAPH DEFENSE ALERT
               </span>
-              <div style={{ fontSize: 16, fontWeight: 600, marginTop: 3, color: '#1a1a1a' }}>
+              <div style={{ fontSize: 15, fontWeight: 600, marginTop: 2, color: '#1a1a1a' }}>
                 4 applications from Rawalpindi Branch (RWP-114) in 2 hours collide on IMEI hash.
               </div>
             </div>
@@ -217,9 +217,21 @@ export default function FeatureShowcase() {
             gap: 16px;
             margin-bottom: 32px;
           }
+          .workbench-content-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 28px;
+            align-items: center;
+          }
           @media (max-width: 900px) {
             .pipeline-grid {
               grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+          }
+          @media (max-width: 820px) {
+            .workbench-content-grid {
+              grid-template-columns: 1fr;
+              gap: 20px;
             }
           }
           @media (max-width: 540px) {
@@ -353,7 +365,7 @@ export default function FeatureShowcase() {
             background: '#f2efdc',
             border: '2px solid #1a1a1a',
             borderRadius: 24,
-            padding: 32,
+            padding: 'clamp(18px, 4vw, 32px)',
             boxShadow: '6px 6px 0 #1a1a1a',
             position: 'relative',
           }}
@@ -364,9 +376,9 @@ export default function FeatureShowcase() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              paddingBottom: 18,
+              paddingBottom: 16,
               borderBottom: '2px solid #1a1a1a',
-              marginBottom: 24,
+              marginBottom: 20,
               flexWrap: 'wrap',
               gap: 12,
             }}
@@ -375,16 +387,16 @@ export default function FeatureShowcase() {
               <span
                 style={{
                   fontFamily: "'Fraunces', Georgia, serif",
-                  fontSize: 24,
+                  fontSize: 'clamp(18px, 4vw, 24px)',
                   fontWeight: 600,
                   color: '#1a1a1a',
                 }}
               >
-                Stage {PIPELINE_STEPS[activeStep]?.step} Inspection Workbench: {PIPELINE_STEPS[activeStep]?.title}
+                Stage {PIPELINE_STEPS[activeStep]?.step} Inspection: {PIPELINE_STEPS[activeStep]?.title}
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span
                 style={{
                   fontSize: 11,
@@ -416,7 +428,7 @@ export default function FeatureShowcase() {
 
           {/* Dynamic Workbench Content Per Step */}
           {activeStep === 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 28, alignItems: 'center' }}>
+            <div className="workbench-content-grid">
               <div>
                 <h4 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, margin: '0 0 8px 0' }}>
                   Biometric Facial Liveness & NADRA Verisys Extraction
@@ -464,7 +476,7 @@ export default function FeatureShowcase() {
           )}
 
           {activeStep === 1 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 28, alignItems: 'center' }}>
+            <div className="workbench-content-grid">
               <div>
                 <h4 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, margin: '0 0 8px 0' }}>
                   Heuristic Income-to-Volume Multiplier Evaluation
@@ -504,7 +516,7 @@ export default function FeatureShowcase() {
           )}
 
           {activeStep === 2 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'center' }}>
+            <div className="workbench-content-grid">
               <div>
                 <h4 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, margin: '0 0 8px 0' }}>
                   Cross-Account Hardware & IP Graph Defense
@@ -539,7 +551,7 @@ export default function FeatureShowcase() {
           )}
 
           {activeStep === 3 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 28, alignItems: 'center' }}>
+            <div className="workbench-content-grid">
               <div>
                 <h4 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, margin: '0 0 8px 0' }}>
                   Immutable Senior Officer Decision Snapshots

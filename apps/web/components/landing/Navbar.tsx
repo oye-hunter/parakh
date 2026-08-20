@@ -20,21 +20,61 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLinkClick = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header
       style={{
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        background: scrolled ? 'rgba(255, 255, 235, 0.92)' : '#ffffeb',
+        background: scrolled ? 'rgba(255, 255, 235, 0.94)' : '#ffffeb',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
         borderBottom: '2px solid #1a1a1a',
-        padding: scrolled ? '12px 24px' : '16px 24px',
+        padding: scrolled ? '10px 16px' : '14px 20px',
         transition: 'padding 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease',
         boxShadow: scrolled ? '0 4px 20px rgba(26, 26, 26, 0.06)' : 'none',
       }}
     >
+      <style>{`
+        .desktop-nav-links {
+          display: flex;
+          align-items: center;
+          gap: 28px;
+        }
+        .desktop-nav-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .mobile-menu-btn {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          width: 44px;
+          height: 44px;
+          background: #e4e4d0;
+          border: 1.5px solid #1a1a1a;
+          border-radius: 10px;
+          cursor: pointer;
+          font-size: 20px;
+        }
+        @media (max-width: 820px) {
+          .desktop-nav-links {
+            display: none;
+          }
+          .desktop-nav-actions {
+            display: none;
+          }
+          .mobile-menu-btn {
+            display: flex;
+          }
+        }
+      `}</style>
+
       <div
         style={{
           maxWidth: 1200,
@@ -45,7 +85,7 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
         }}
       >
         {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <a
             href="#"
             style={{
@@ -60,7 +100,7 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
               style={{
                 fontFamily: "'Fraunces', Georgia, serif",
                 fontWeight: 600,
-                fontSize: 26,
+                fontSize: 24,
                 letterSpacing: '-0.5px',
                 lineHeight: 1,
               }}
@@ -87,14 +127,7 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
         </div>
 
         {/* Desktop Navigation links */}
-        <nav
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 28,
-          }}
-          className="desktop-nav"
-        >
+        <nav className="desktop-nav-links">
           <a
             href="#simulator"
             style={{
@@ -103,10 +136,7 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
               fontWeight: 500,
               fontSize: 14,
               letterSpacing: '0.01em',
-              transition: 'opacity 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
             Risk Profiler
           </a>
@@ -118,10 +148,7 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
               fontWeight: 500,
               fontSize: 14,
               letterSpacing: '0.01em',
-              transition: 'opacity 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
             Compliance Engine
           </a>
@@ -133,17 +160,14 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
               fontWeight: 500,
               fontSize: 14,
               letterSpacing: '0.01em',
-              transition: 'opacity 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
             Mobile APK
           </a>
         </nav>
 
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Desktop Action Buttons */}
+        <div className="desktop-nav-actions">
           <button
             onClick={onOpenDownload}
             style={{
@@ -155,10 +179,7 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
               fontWeight: 600,
               cursor: 'pointer',
               fontSize: 14,
-              transition: 'transform 0.15s ease, box-shadow 0.15s ease',
             }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = 'translateY(1px)')}
-            onMouseUp={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
           >
             Download App
           </button>
@@ -173,13 +194,123 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
               fontWeight: 600,
               cursor: 'pointer',
               fontSize: 14,
-              transition: 'all 0.15s ease',
             }}
           >
             {isConsoleActive ? '← Landing' : 'Officer Console →'}
           </button>
         </div>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle Navigation Menu"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div
+          style={{
+            background: '#ffffeb',
+            borderTop: '1.5px solid #1a1a1a',
+            marginTop: 10,
+            padding: '20px 8px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          <a
+            href="#simulator"
+            onClick={handleLinkClick}
+            style={{
+              color: '#1a1a1a',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: 16,
+              padding: '10px 14px',
+              borderRadius: 8,
+              background: '#f2efdc',
+            }}
+          >
+            Risk Profiler ↓
+          </a>
+          <a
+            href="#features"
+            onClick={handleLinkClick}
+            style={{
+              color: '#1a1a1a',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: 16,
+              padding: '10px 14px',
+              borderRadius: 8,
+              background: '#f2efdc',
+            }}
+          >
+            Compliance Engine ↓
+          </a>
+          <a
+            href="#download"
+            onClick={handleLinkClick}
+            style={{
+              color: '#1a1a1a',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: 16,
+              padding: '10px 14px',
+              borderRadius: 8,
+              background: '#f2efdc',
+            }}
+          >
+            Mobile APK Portal ↓
+          </a>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenDownload();
+              }}
+              style={{
+                width: '100%',
+                background: '#f0d7ff',
+                color: '#1a1a1a',
+                border: '2px solid #1a1a1a',
+                borderRadius: 12,
+                padding: '12px',
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: 'pointer',
+              }}
+            >
+              Download Mobile App (APK)
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onToggleConsole();
+              }}
+              style={{
+                width: '100%',
+                background: isConsoleActive ? '#034f46' : '#ffffeb',
+                color: isConsoleActive ? '#ffffeb' : '#1a1a1a',
+                border: '2px solid #1a1a1a',
+                borderRadius: 12,
+                padding: '12px',
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: 'pointer',
+              }}
+            >
+              {isConsoleActive ? '← Back to Landing' : 'Senior Officer Console →'}
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

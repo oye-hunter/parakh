@@ -384,11 +384,13 @@ export default function AdminPortal() {
         style={{
           backgroundColor: '#1a1a1a',
           color: '#ffffeb',
-          padding: '16px 28px',
+          padding: '16px 20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           borderBottom: '2px solid #1a1a1a',
+          flexWrap: 'wrap',
+          gap: 14,
         }}
       >
         <div>
@@ -400,7 +402,7 @@ export default function AdminPortal() {
           </h1>
         </div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <button
             onClick={() => setView('landing')}
             style={{
@@ -447,7 +449,7 @@ export default function AdminPortal() {
       </header>
 
       {/* ── Main Container ── */}
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 20px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
         {/* Cluster Alert Banner */}
         {dashData?.clusters && dashData.clusters.length > 0 && (
           <div
@@ -490,7 +492,7 @@ export default function AdminPortal() {
         )}
 
         {/* ── Stat Cards Grid ── */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           <div style={cardStyle}>
             <span style={statLabelStyle}>Applications Today</span>
             <div style={statValueStyle}>{dashLoading ? '—' : stats?.applicationsToday ?? 0}</div>
@@ -521,7 +523,7 @@ export default function AdminPortal() {
         </section>
 
         {/* ── Visual Data Distribution Chart & Officer Metrics ── */}
-        <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
           {/* Risk Distribution Progress Bar */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -731,7 +733,7 @@ export default function AdminPortal() {
             </div>
 
             {/* Audit Table */}
-            <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+            <div style={{ ...cardStyle, padding: 0, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               {decisionsLoading ? (
                 <div style={{ padding: 20 }}>Loading agent work audit trail…</div>
               ) : filteredDecisions.length === 0 ? (
@@ -797,10 +799,12 @@ export default function AdminPortal() {
             style={{
               width: '100%',
               maxWidth: 440,
+              maxHeight: '90vh',
+              overflowY: 'auto',
               backgroundColor: '#ffffeb',
               borderRadius: 24,
               border: `3px solid ${modalAction === 'approve' ? '#034f46' : '#a8322a'}`,
-              padding: 24,
+              padding: 'clamp(18px, 4vw, 24px)',
               display: 'flex',
               flexDirection: 'column',
               gap: 16,

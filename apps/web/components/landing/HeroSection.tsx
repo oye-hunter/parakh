@@ -147,11 +147,12 @@ export default function HeroSection({ onOpenDownload }: Props) {
 
   return (
     <section
+      id="hero"
       ref={containerRef}
       style={{
         background: '#ffffeb',
         borderBottom: '2px solid #1a1a1a',
-        padding: '72px 24px 88px',
+        padding: 'clamp(44px, 7vw, 72px) clamp(16px, 4vw, 24px) clamp(56px, 8vw, 88px)',
         overflow: 'hidden',
         position: 'relative',
       }}
@@ -170,16 +171,45 @@ export default function HeroSection({ onOpenDownload }: Props) {
         }}
       />
 
+      <style>{`
+        .hero-layout-grid {
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 48px;
+          align-items: center;
+          position: relative;
+          z-index: 1;
+        }
+        .hero-cta-group {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 40px;
+          flex-wrap: wrap;
+        }
+        @media (max-width: 860px) {
+          .hero-layout-grid {
+            grid-template-columns: 1fr;
+            gap: 36px;
+          }
+          .hero-cta-group {
+            flex-direction: column;
+            width: 100%;
+          }
+          .hero-cta-group a,
+          .hero-cta-group button {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+          }
+        }
+      `}</style>
+
       <div
+        className="hero-layout-grid"
         style={{
           maxWidth: 1200,
           margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: '1.1fr 0.9fr',
-          gap: 56,
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 1,
         }}
       >
         {/* Left Editorial Copy */}
@@ -195,7 +225,7 @@ export default function HeroSection({ onOpenDownload }: Props) {
               border: '1.5px solid #1a1a1a',
               borderRadius: 9999,
               padding: '4px 12px',
-              marginBottom: 20,
+              marginBottom: 18,
             }}
           >
             <span
@@ -227,12 +257,12 @@ export default function HeroSection({ onOpenDownload }: Props) {
             ref={headlineRef}
             style={{
               fontFamily: "'Fraunces', Georgia, serif",
-              fontSize: 56,
+              fontSize: 'clamp(32px, 7vw, 56px)',
               fontWeight: 600,
-              lineHeight: 1.04,
+              lineHeight: 1.08,
               letterSpacing: '-1.2px',
               color: '#1a1a1a',
-              margin: '0 0 24px 0',
+              margin: '0 0 20px 0',
               position: 'relative',
             }}
           >
@@ -281,6 +311,7 @@ export default function HeroSection({ onOpenDownload }: Props) {
           {/* CTAs */}
           <div
             ref={ctaGroupRef}
+            className="hero-cta-group"
             style={{
               display: 'flex',
               gap: 14,

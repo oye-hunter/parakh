@@ -110,13 +110,28 @@ export default function RiskSimulator() {
       style={{
         background: '#f2efdc',
         borderBottom: '2px solid #1a1a1a',
-        padding: '88px 24px',
+        padding: 'clamp(44px, 6vw, 88px) clamp(16px, 4vw, 24px)',
         position: 'relative',
       }}
     >
+      <style>{`
+        .simulator-split-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 32px;
+          align-items: stretch;
+        }
+        @media (max-width: 860px) {
+          .simulator-split-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+        }
+      `}</style>
+
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         {/* Section Header */}
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div
             style={{
               display: 'inline-flex',
@@ -131,7 +146,7 @@ export default function RiskSimulator() {
               fontWeight: 600,
               letterSpacing: '0.10em',
               textTransform: 'uppercase',
-              marginBottom: 16,
+              marginBottom: 14,
             }}
           >
             INTERACTIVE BENCHMARK
@@ -139,7 +154,7 @@ export default function RiskSimulator() {
           <h2
             style={{
               fontFamily: "'Fraunces', Georgia, serif",
-              fontSize: 40,
+              fontSize: 'clamp(28px, 6vw, 40px)',
               fontWeight: 600,
               color: '#1a1a1a',
               margin: '0 0 12px 0',
@@ -148,7 +163,7 @@ export default function RiskSimulator() {
           >
             Real-Time Risk Profiling Engine
           </h2>
-          <p style={{ fontSize: 16, color: '#444444', margin: 0, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
+          <p style={{ fontSize: 15, color: '#444444', margin: 0, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
             Adjust onboarding signals or trigger scenario presets below to observe Parakh's instantaneous mathematical evidence extraction and explainable reasoning.
           </p>
 
@@ -157,8 +172,8 @@ export default function RiskSimulator() {
             style={{
               display: 'flex',
               justifyContent: 'center',
-              gap: 12,
-              marginTop: 24,
+              gap: 10,
+              marginTop: 20,
               flexWrap: 'wrap',
             }}
           >
@@ -185,7 +200,8 @@ export default function RiskSimulator() {
                     color: isSelected ? '#ffffeb' : '#1a1a1a',
                     border: '2px solid #1a1a1a',
                     borderRadius: 9999,
-                    padding: '6px 16px',
+                    padding: '8px 16px',
+                    minHeight: 40,
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -212,14 +228,7 @@ export default function RiskSimulator() {
         </div>
 
         {/* Simulator Split Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 32,
-            alignItems: 'stretch',
-          }}
-        >
+        <div className="simulator-split-grid">
           {/* Left Controls Card */}
           <div
             ref={leftCardRef}
@@ -227,7 +236,7 @@ export default function RiskSimulator() {
               background: '#ffffeb',
               border: '2px solid #1a1a1a',
               borderRadius: 24,
-              padding: 32,
+              padding: 'clamp(18px, 4vw, 32px)',
               boxShadow: '4px 4px 0 #1a1a1a',
               display: 'flex',
               flexDirection: 'column',
@@ -484,7 +493,7 @@ export default function RiskSimulator() {
               background: '#ffffeb',
               border: '2px solid #1a1a1a',
               borderRadius: 24,
-              padding: 32,
+              padding: 'clamp(18px, 4vw, 32px)',
               boxShadow: '4px 4px 0 #1a1a1a',
               display: 'flex',
               flexDirection: 'column',
