@@ -75,32 +75,7 @@ export default function RiskSimulator() {
   };
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      if (!sectionRef.current) return;
-
-      const cards = [leftCardRef.current, rightCardRef.current].filter(Boolean);
-      if (cards.length > 0) {
-        gsap.fromTo(
-          cards,
-          { opacity: 0.3, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.15,
-            duration: 0.6,
-            ease: 'power2.out',
-            clearProps: 'all',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      }
-    }, sectionRef);
-
-    return () => ctx.revert();
+    // Keep React rendering pure without DOM inline style wipes
   }, []);
 
   return (
@@ -120,6 +95,16 @@ export default function RiskSimulator() {
           grid-template-columns: 1fr 1fr;
           gap: 32px;
           align-items: stretch;
+        }
+        .simulator-card {
+          background-color: #ffffeb !important;
+          border: 2px solid #1a1a1a !important;
+          border-radius: 24px !important;
+          box-shadow: 4px 4px 0 #1a1a1a !important;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          box-sizing: border-box;
         }
         @media (max-width: 860px) {
           .simulator-split-grid {
@@ -232,15 +217,9 @@ export default function RiskSimulator() {
           {/* Left Controls Card */}
           <div
             ref={leftCardRef}
+            className="simulator-card"
             style={{
-              background: '#ffffeb',
-              border: '2px solid #1a1a1a',
-              borderRadius: 24,
               padding: 'clamp(18px, 4vw, 32px)',
-              boxShadow: '4px 4px 0 #1a1a1a',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
             }}
           >
             <div>
@@ -489,15 +468,9 @@ export default function RiskSimulator() {
           {/* Right Live Judgment & Visual Gauge Card */}
           <div
             ref={rightCardRef}
+            className="simulator-card"
             style={{
-              background: '#ffffeb',
-              border: '2px solid #1a1a1a',
-              borderRadius: 24,
               padding: 'clamp(18px, 4vw, 32px)',
-              boxShadow: '4px 4px 0 #1a1a1a',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
             }}
           >
             <div>

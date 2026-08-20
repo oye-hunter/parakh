@@ -82,49 +82,7 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
   ];
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      if (!sectionRef.current) return;
-
-      if (leftColRef.current) {
-        gsap.fromTo(
-          leftColRef.current,
-          { opacity: 0.3, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out',
-            clearProps: 'all',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      }
-
-      if (phoneMockupRef.current) {
-        gsap.fromTo(
-          phoneMockupRef.current,
-          { opacity: 0.3, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out',
-            clearProps: 'all',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      }
-    }, sectionRef);
-
-    return () => ctx.revert();
+    // Keep React rendering pure without DOM inline style wipes
   }, []);
 
   return (
@@ -144,6 +102,18 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
           grid-template-columns: 1.1fr 0.9fr;
           gap: 48px;
           align-items: center;
+        .portal-download-box {
+          background-color: #ffffeb !important;
+          border: 2px solid #1a1a1a !important;
+          border-radius: 20px !important;
+          box-shadow: 4px 4px 0 #1a1a1a !important;
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          margin-bottom: 32px;
+          flex-wrap: wrap;
+          padding: 24px;
+          box-sizing: border-box;
         }
         @media (max-width: 860px) {
           .portal-layout-grid {

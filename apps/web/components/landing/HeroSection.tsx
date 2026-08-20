@@ -187,6 +187,14 @@ export default function HeroSection({ onOpenDownload }: Props) {
           margin-bottom: 40px;
           flex-wrap: wrap;
         }
+        .hero-card {
+          background-color: #f2efdc !important;
+          border: 2px solid #1a1a1a !important;
+          border-radius: 24px !important;
+          box-shadow: 6px 6px 0 #1a1a1a !important;
+          position: relative;
+          box-sizing: border-box;
+        }
         @media (max-width: 860px) {
           .hero-layout-grid {
             grid-template-columns: 1fr;
@@ -390,13 +398,9 @@ export default function HeroSection({ onOpenDownload }: Props) {
         {/* Right Hero Live Appraisal Card Showcase */}
         <div
           ref={cardWrapperRef}
+          className="hero-card"
           style={{
-            background: '#f2efdc',
-            border: '2px solid #1a1a1a',
-            borderRadius: 24,
             padding: 24,
-            boxShadow: '8px 8px 0px #1a1a1a',
-            position: 'relative',
           }}
         >
           {/* Card Top Telemetry Ribbon */}
