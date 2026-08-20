@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { gsap } from '@/lib/gsap';
+import { useEffect, useRef, useState } from 'react';
+import { gsap, ScrollTrigger } from '@/lib/gsap';
 
 interface Props {
   onOpenDownload: () => void;
@@ -10,39 +10,136 @@ interface Props {
 export default function HeroSection({ onOpenDownload }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const subtextRef = useRef<HTMLParagraphElement>(null);
+  const ctaGroupRef = useRef<HTMLDivElement>(null);
   const squiggleRef = useRef<SVGPathElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardWrapperRef = useRef<HTMLDivElement>(null);
+  const badgePillRef = useRef<HTMLDivElement>(null);
+
+  const [activeSignal, setActiveSignal] = useState<number>(0);
+
+  const signals = [
+    {
+      title: 'Income–volume mismatch',
+      evidence: 'declared 45,000/mo · expects 400,000/mo · 8.9×',
+      severity: 'high',
+      weight: 'contributed 48%',
+    },
+    {
+      title: 'Device cluster hash collision',
+      evidence: 'SHA-256(IMEI+MAC) matches 3 flagged RWP apps',
+      severity: 'high',
+      weight: 'contributed 32%',
+    },
+    {
+      title: 'CNIC biometric liveness check',
+      evidence: 'Verisys NADRA match confirmed · 99.4% confidence',
+      severity: 'low',
+      weight: 'contributed 20%',
+    },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate headline entrance
-      gsap.from(headlineRef.current, {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.out',
+      // Main entrance timeline
+      const tl = gsap.timeline({
+        defaults: { ease: 'power3.out' },
+        onComplete: () => {
+          gsap.set(
+            [
+              eyebrowRef.current,
+              headlineRef.current,
+              subtextRef.current,
+              ctaGroupRef.current,
+              cardWrapperRef.current,
+              badgePillRef.current,
+            ].filter(Boolean),
+            { clearProps: 'opacity,transform' }
+          );
+        },
       });
 
-      // Animate hand-drawn squiggle path drawing
+      tl.from(eyebrowRef.current, {
+        opacity: 0.2,
+        y: 20,
+        duration: 0.5,
+      })
+        .from(
+          headlineRef.current,
+          {
+            opacity: 0.2,
+            y: 30,
+            duration: 0.7,
+          },
+          '-=0.3'
+        )
+        .from(
+          subtextRef.current,
+          {
+            opacity: 0.2,
+            y: 20,
+            duration: 0.6,
+          },
+          '-=0.4'
+        )
+        .from(
+          ctaGroupRef.current,
+          {
+            opacity: 0.2,
+            y: 15,
+            duration: 0.5,
+          },
+          '-=0.3'
+        )
+        .from(
+          cardWrapperRef.current,
+          {
+            opacity: 0.2,
+            y: 40,
+            duration: 0.8,
+          },
+          '-=0.5'
+        )
+        .from(
+          badgePillRef.current,
+          {
+            scale: 0.5,
+            opacity: 0.2,
+            duration: 0.4,
+            ease: 'back.out(1.7)',
+          },
+          '-=0.3'
+        );
+
+      // Squiggle draw
       if (squiggleRef.current) {
         const length = squiggleRef.current.getTotalLength();
         gsap.set(squiggleRef.current, { strokeDasharray: length, strokeDashoffset: length });
-        gsap.to(squiggleRef.current, {
-          strokeDashoffset: 0,
-          duration: 1.2,
-          delay: 0.5,
-          ease: 'power2.inOut',
-        });
+        tl.to(
+          squiggleRef.current,
+          {
+            strokeDashoffset: 0,
+            duration: 1.2,
+            ease: 'power2.inOut',
+          },
+          '-=0.8'
+        );
       }
 
-      // Animate hero floating case card
-      gsap.from(cardRef.current, {
-        y: 50,
-        opacity: 0,
-        duration: 1,
-        delay: 0.4,
-        ease: 'power2.out',
-      });
+      // Parallax scroll effect on hero card
+      if (cardWrapperRef.current && containerRef.current) {
+        gsap.to(cardWrapperRef.current, {
+          y: 40,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1.2,
+          },
+        });
+      }
     }, containerRef);
 
     return () => ctx.revert();
@@ -54,33 +151,86 @@ export default function HeroSection({ onOpenDownload }: Props) {
       style={{
         background: '#ffffeb',
         borderBottom: '2px solid #1a1a1a',
-        padding: '80px 24px',
+        padding: '72px 24px 88px',
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
+      {/* Background ledger grid lines */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'radial-gradient(#e4e4d0 1px, transparent 1px), radial-gradient(#e4e4d0 1px, #ffffeb 1px)',
+          backgroundSize: '40px 40px',
+          backgroundPosition: '0 0, 20px 20px',
+          opacity: 0.45,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: '1.1fr 0.9fr',
+          gap: 56,
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         {/* Left Editorial Copy */}
         <div>
-          <div style={{
-            fontSize: 12,
-            fontFamily: "'Archivo', sans-serif",
-            fontWeight: 600,
-            letterSpacing: '0.10em',
-            textTransform: 'uppercase',
-            color: '#8a8a80',
-            marginBottom: 16,
-          }}>
-            PARAKH · DIGITAL ONBOARDING RISK ENGINE
+          {/* Eyebrow badge */}
+          <div
+            ref={eyebrowRef}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              background: '#e4e4d0',
+              border: '1.5px solid #1a1a1a',
+              borderRadius: 9999,
+              padding: '4px 12px',
+              marginBottom: 20,
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: '#034f46',
+                display: 'inline-block',
+                boxShadow: '0 0 0 2px rgba(3, 79, 70, 0.2)',
+              }}
+            />
+            <span
+              style={{
+                fontSize: 11,
+                fontFamily: "'Archivo', sans-serif",
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: '#1a1a1a',
+              }}
+            >
+              PARAKH · DIGITAL ONBOARDING RISK ENGINE
+            </span>
           </div>
 
+          {/* Headline */}
           <h1
             ref={headlineRef}
             style={{
               fontFamily: "'Fraunces', Georgia, serif",
-              fontSize: 52,
+              fontSize: 56,
               fontWeight: 600,
-              lineHeight: 1.05,
-              letterSpacing: '-1px',
+              lineHeight: 1.04,
+              letterSpacing: '-1.2px',
               color: '#1a1a1a',
               margin: '0 0 24px 0',
               position: 'relative',
@@ -94,10 +244,10 @@ export default function HeroSection({ onOpenDownload }: Props) {
                 fill="none"
                 style={{
                   position: 'absolute',
-                  bottom: -10,
+                  bottom: -8,
                   left: 0,
                   width: '100%',
-                  height: 16,
+                  height: 14,
                   overflow: 'visible',
                 }}
               >
@@ -113,11 +263,31 @@ export default function HeroSection({ onOpenDownload }: Props) {
             </span>
           </h1>
 
-          <p style={{ fontSize: 18, lineHeight: 1.5, color: '#222222', margin: '0 0 32px 0', maxWidth: 500 }}>
-            AI-driven customer risk profiling for financial onboarding. Pure transparency on warm paper — zero silent scores, zero black boxes.
+          {/* Subtext */}
+          <p
+            ref={subtextRef}
+            style={{
+              fontSize: 18,
+              lineHeight: 1.5,
+              color: '#222222',
+              margin: '0 0 32px 0',
+              maxWidth: 520,
+            }}
+          >
+            Transparent customer risk profiling for digital financial onboarding. Pure clarity on
+            warm paper — zero silent scores, zero black boxes, instant explainability.
           </p>
 
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          {/* CTAs */}
+          <div
+            ref={ctaGroupRef}
+            style={{
+              display: 'flex',
+              gap: 14,
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
             <button
               onClick={onOpenDownload}
               style={{
@@ -125,11 +295,14 @@ export default function HeroSection({ onOpenDownload }: Props) {
                 color: '#1a1a1a',
                 border: '2px solid #1a1a1a',
                 borderRadius: 12,
-                padding: '16px 28px',
-                fontSize: 16,
+                padding: '14px 26px',
+                fontSize: 15,
                 fontWeight: 600,
                 cursor: 'pointer',
+                transition: 'all 0.15s ease',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '3px 3px 0 #1a1a1a')}
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}
             >
               Download Mobile App (APK)
             </button>
@@ -140,62 +313,278 @@ export default function HeroSection({ onOpenDownload }: Props) {
                 color: '#1a1a1a',
                 border: '2px solid #1a1a1a',
                 borderRadius: 12,
-                padding: '16px 28px',
-                fontSize: 16,
+                padding: '14px 24px',
+                fontSize: 15,
                 fontWeight: 600,
                 textDecoration: 'none',
-                display: 'inline-block',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                transition: 'all 0.15s ease',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '3px 3px 0 #1a1a1a')}
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}
             >
-              Try Risk Simulator ↓
+              <span>Simulate Risk Engine</span>
+              <span>↓</span>
             </a>
+          </div>
+
+          {/* Telemetry Micro-Pills */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 16,
+              marginTop: 36,
+              paddingTop: 24,
+              borderTop: '1px solid #e4e4d0',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#8a8a80' }}>
+              <span style={{ color: '#034f46', fontWeight: 700 }}>✓</span>
+              <span>Verisys 99.4% precision</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#8a8a80' }}>
+              <span style={{ color: '#034f46', fontWeight: 700 }}>✓</span>
+              <span>32ms median appraisal</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#8a8a80' }}>
+              <span style={{ color: '#034f46', fontWeight: 700 }}>✓</span>
+              <span>Immutable audit log</span>
+            </div>
           </div>
         </div>
 
-        {/* Right Hero Case Card Showcase */}
-        <div ref={cardRef} style={{ background: '#f2efdc', border: '2px solid #1a1a1a', borderRadius: 24, padding: 24 }}>
-          {/* Card Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div>
-              <h4 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Tariq H. Al-Mansoor</h4>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: '#8a8a80' }}>
-                CNIC: 42101-9876543-1
+        {/* Right Hero Live Appraisal Card Showcase */}
+        <div
+          ref={cardWrapperRef}
+          style={{
+            background: '#f2efdc',
+            border: '2px solid #1a1a1a',
+            borderRadius: 24,
+            padding: 24,
+            boxShadow: '8px 8px 0px #1a1a1a',
+            position: 'relative',
+          }}
+        >
+          {/* Card Top Telemetry Ribbon */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingBottom: 14,
+              borderBottom: '1px solid #e4e4d0',
+              marginBottom: 16,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: '#a8322a',
+                  display: 'inline-block',
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: '#1a1a1a',
+                }}
+              >
+                LIVE CASE APPRAISAL #PK-88412
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{
-                background: '#a8322a',
-                color: '#ffffeb',
-                padding: '6px 14px',
-                borderRadius: 9999,
-                fontSize: 13,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-              }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontFamily: "'JetBrains Mono', monospace",
+                color: '#8a8a80',
+              }}
+            >
+              EVAL: 28ms
+            </span>
+          </div>
+
+          {/* Applicant Info Header */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: 18,
+            }}
+          >
+            <div>
+              <h3
+                style={{
+                  margin: '0 0 4px 0',
+                  fontFamily: "'Fraunces', Georgia, serif",
+                  fontSize: 22,
+                  fontWeight: 600,
+                  color: '#1a1a1a',
+                }}
+              >
+                Tariq H. Al-Mansoor
+              </h3>
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 13,
+                  color: '#8a8a80',
+                }}
+              >
+                CNIC: 42101-9876543-1 · RWP Branch
+              </div>
+            </div>
+
+            <div
+              ref={badgePillRef}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  background: '#a8322a',
+                  color: '#ffffeb',
+                  padding: '6px 14px',
+                  borderRadius: 9999,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                }}
+              >
                 HIGH
               </span>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: '#8a8a80' }}>
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#8a8a80',
+                }}
+              >
                 0.87
               </span>
             </div>
           </div>
 
-          {/* Evidence Row Sample */}
-          <div style={{ background: '#e4e4d0', borderLeft: '3px solid #a8322a', borderRadius: 12, padding: '12px 16px', marginBottom: 12 }}>
-            <div style={{ fontWeight: 600, fontSize: 15 }}>Income–volume mismatch</div>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: '#222222', marginTop: 4 }}>
-              declared 45,000/mo · expects 400,000/mo · 8.9×
+          {/* Interactive Evidence Signal Rows */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontFamily: "'Archivo', sans-serif",
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: '#8a8a80',
+              }}
+            >
+              TRIPPED SIGNAL EVIDENCE ({signals.length})
             </div>
+
+            {signals.map((sig, idx) => (
+              <div
+                key={sig.title}
+                onClick={() => setActiveSignal(idx)}
+                style={{
+                  background: activeSignal === idx ? '#ffffeb' : '#e4e4d0',
+                  border: `1.5px solid ${activeSignal === idx ? '#1a1a1a' : 'transparent'}`,
+                  borderLeft: `4px solid ${sig.severity === 'high' ? '#a8322a' : '#034f46'}`,
+                  borderRadius: 12,
+                  padding: '10px 14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, fontSize: 14, color: '#1a1a1a' }}>
+                    {sig.title}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      color: '#8a8a80',
+                    }}
+                  >
+                    {sig.weight}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 12,
+                    color: '#444444',
+                    marginTop: 3,
+                  }}
+                >
+                  {sig.evidence}
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* AI Reasoning Sample */}
-          <div style={{ background: '#ffffeb', border: '1.5px solid #1a1a1a', borderRadius: 16, padding: 16 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.10em', color: '#8a8a80', textTransform: 'uppercase' }}>
-              AI REASONING
-            </span>
-            <p style={{ fontSize: 15, lineHeight: 1.6, margin: '8px 0 0 0' }}>
-              Applicant declared modest personal income, yet specified transaction volume characteristic of commercial trade. Device fingerprint matches 3 recent flagged accounts.
+          {/* AI Explainability Reasoning Box */}
+          <div
+            style={{
+              background: '#ffffeb',
+              border: '1.5px solid #1a1a1a',
+              borderRadius: 16,
+              padding: 16,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 6,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  color: '#8a8a80',
+                  textTransform: 'uppercase',
+                }}
+              >
+                AI EXPLAINABILITY JUSTIFICATION
+              </span>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  background: '#e4e4d0',
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                  fontWeight: 600,
+                }}
+              >
+                RULE-ID: EDD-402
+              </span>
+            </div>
+            <p
+              style={{
+                fontSize: 14,
+                lineHeight: 1.55,
+                margin: 0,
+                color: '#1a1a1a',
+              }}
+            >
+              Applicant declared personal earnings of 45k PKR but requested merchant-tier volume (400k PKR). Coupled with an identical device signature shared by 3 recently escalated accounts, automated triage routed this case directly to the Senior Officer EDD queue.
             </p>
           </div>
         </div>
