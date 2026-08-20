@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Navbar from '@/components/landing/Navbar';
+import HeroSection from '@/components/landing/HeroSection';
+import RiskSimulator from '@/components/landing/RiskSimulator';
+import FeatureShowcase from '@/components/landing/FeatureShowcase';
+import DownloadPortal from '@/components/landing/DownloadPortal';
+import AppDownloadModal from '@/components/landing/AppDownloadModal';
+import Footer from '@/components/landing/Footer';
 
 /* ────────────────────────── Types ────────────────────────── */
 
@@ -127,6 +134,9 @@ function relativeTime(iso: string): string {
 
 export default function AdminPortal() {
   const queryClient = useQueryClient();
+
+  const [view, setView] = useState<'landing' | 'console'>('landing');
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
 
   const [email, setEmail] = useState('sana.rehman@parakh.pk');
   const [password, setPassword] = useState('parakh-demo-2026');
@@ -265,21 +275,45 @@ export default function AdminPortal() {
     });
   };
 
+  if (view === 'landing') {
+    return (
+      <main style={{ background: '#f2efdc', minHeight: '100vh', color: '#1a1a1a' }}>
+        <Navbar
+          onOpenDownload={() => setIsDownloadOpen(true)}
+          onToggleConsole={() => setView('console')}
+          isConsoleActive={false}
+        />
+        <HeroSection onOpenDownload={() => setIsDownloadOpen(true)} />
+        <RiskSimulator />
+        <FeatureShowcase />
+        <DownloadPortal onOpenDownload={() => setIsDownloadOpen(true)} />
+        <Footer />
+        <AppDownloadModal isOpen={isDownloadOpen} onClose={() => setIsDownloadOpen(false)} />
+      </main>
+    );
+  }
+
   if (isUnauthenticated) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#f2efdc', color: '#1a1a1a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-        <div style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffeb', borderRadius: 24, border: '2px solid #1a1a1a', padding: 32, display: 'flex', flexDirection: 'column', gap: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-          <div>
+        <div style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffeb', borderRadius: 24, border: '2px solid #1a1a1a', padding: 32, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8a8a80', fontWeight: 700 }}>
               PARAKH · COMPLIANCE ADMIN
             </div>
-            <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 28, margin: '6px 0 4px', fontWeight: 600 }}>
-              Senior Officer Sign In
-            </h1>
-            <p style={{ fontSize: 13, color: '#8a8a80', margin: 0 }}>
-              Sign in with an authorized officer account to access the audit & triage console.
-            </p>
+            <button
+              onClick={() => setView('landing')}
+              style={{ background: 'none', border: 'none', color: '#1a1a1a', cursor: 'pointer', fontSize: 13, fontWeight: 600, textDecoration: 'underline' }}
+            >
+              ← Landing
+            </button>
           </div>
+          <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 28, margin: '6px 0 4px', fontWeight: 600 }}>
+            Senior Officer Sign In
+          </h1>
+          <p style={{ fontSize: 13, color: '#8a8a80', margin: 0 }}>
+            Sign in with an authorized officer account to access the audit & triage console.
+          </p>
 
           <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -350,11 +384,13 @@ export default function AdminPortal() {
         style={{
           backgroundColor: '#1a1a1a',
           color: '#ffffeb',
-          padding: '16px 28px',
+          padding: '16px 20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           borderBottom: '2px solid #1a1a1a',
+          flexWrap: 'wrap',
+          gap: 14,
         }}
       >
         <div>
@@ -366,7 +402,22 @@ export default function AdminPortal() {
           </h1>
         </div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setView('landing')}
+            style={{
+              backgroundColor: '#ffffeb',
+              color: '#1a1a1a',
+              border: '1.5px solid #ffffeb',
+              borderRadius: 8,
+              padding: '6px 14px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            ← Landing Page
+          </button>
           <span
             style={{
               padding: '4px 12px',
@@ -398,7 +449,7 @@ export default function AdminPortal() {
       </header>
 
       {/* ── Main Container ── */}
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 20px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
         {/* Cluster Alert Banner */}
         {dashData?.clusters && dashData.clusters.length > 0 && (
           <div
@@ -441,7 +492,7 @@ export default function AdminPortal() {
         )}
 
         {/* ── Stat Cards Grid ── */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           <div style={cardStyle}>
             <span style={statLabelStyle}>Applications Today</span>
             <div style={statValueStyle}>{dashLoading ? '—' : stats?.applicationsToday ?? 0}</div>
@@ -472,7 +523,7 @@ export default function AdminPortal() {
         </section>
 
         {/* ── Visual Data Distribution Chart & Officer Metrics ── */}
-        <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
           {/* Risk Distribution Progress Bar */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -682,7 +733,7 @@ export default function AdminPortal() {
             </div>
 
             {/* Audit Table */}
-            <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+            <div style={{ ...cardStyle, padding: 0, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               {decisionsLoading ? (
                 <div style={{ padding: 20 }}>Loading agent work audit trail…</div>
               ) : filteredDecisions.length === 0 ? (
@@ -748,10 +799,12 @@ export default function AdminPortal() {
             style={{
               width: '100%',
               maxWidth: 440,
+              maxHeight: '90vh',
+              overflowY: 'auto',
               backgroundColor: '#ffffeb',
               borderRadius: 24,
               border: `3px solid ${modalAction === 'approve' ? '#034f46' : '#a8322a'}`,
-              padding: 24,
+              padding: 'clamp(18px, 4vw, 24px)',
               display: 'flex',
               flexDirection: 'column',
               gap: 16,

@@ -2,13 +2,13 @@ import type { ReactNode } from 'react';
 import Providers from './providers';
 
 export const metadata = {
-  title: 'Parakh Admin · Senior Officer Audit & Triage Console',
-  description: 'Every judgment, explained.',
+  title: 'Parakh — AI Customer Risk Profiling & Mobile App',
+  description: 'Every judgment, explained. AI-driven customer risk profiling for digital onboarding.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -17,7 +17,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
       </head>
-      <body style={{ margin: 0, background: '#f2efdc', color: '#1a1a1a', fontFamily: "'Archivo', system-ui, sans-serif" }}>
+      <body
+        suppressHydrationWarning
+        style={{
+          margin: 0,
+          background: '#f2efdc',
+          color: '#1a1a1a',
+          fontFamily: "'Archivo', system-ui, sans-serif",
+        }}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>
