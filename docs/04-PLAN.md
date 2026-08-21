@@ -70,20 +70,28 @@ Volume over time, risk distribution bar, queue depth, cases resolved, cluster al
 
 | Deliverable | Owner | Status |
 |---|---|---|
-| Working application — APK, mobile-first | | ☐ |
-| GitHub repository | | ☐ |
+| Working application — APK, mobile-first | | ✅ Built & Downloadable via `/api/download/apk` |
+| GitHub repository | | ✅ Complete Monorepo |
 | Visual architecture diagram (image/PDF) | | ☐ |
-| Stitch-designed UI/UX screens | | ☐ |
+| Stitch-designed UI/UX screens | | ✅ DESIGN.md Warm Ledger |
 | Demo video, 3–5 minutes | | ☐ |
 | LinkedIn post screenshot | | ☐ |
-| README with assumptions, tool usage, mock data | | ☐ |
+| README with assumptions, tool usage, mock data | | ✅ Updated with APK guide |
+
+---
+
+## APK Distribution Strategy
+
+1. **Self-Hosted Monorepo Path:** Place compiled APK in `apps/web/public/downloads/parakh-v1.0.0.apk`. Served directly by Next.js route handler.
+2. **Cloud CDN / Google Drive / GitHub Release Path:** Set `APK_DOWNLOAD_URL="https://..."` in `.env`.
+3. **EAS Build Command:** `cd apps/mobile && eas build -p android --profile preview`.
 
 ---
 
 ## Risks
 
 ### The API key ends up in the app bundle
-Mobile bundles are trivially decompiled. The Gemini key lives **only** in a Next.js Route Handler — never in the mobile app, never behind an `EXPO_PUBLIC_` prefix. Verify before shipping, not after.
+Mobile bundles are trivially decompiled. The Groq key lives **only** in a Next.js Route Handler — never in the mobile app, never behind an `EXPO_PUBLIC_` prefix. Verify before shipping, not after.
 
 ### The APK build fails late
 EAS Build has signing and credential steps that can surprise you. **Run one full build early in the week**, even against a half-finished app. Do not discover this at hour 45.

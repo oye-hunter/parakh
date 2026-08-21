@@ -1,12 +1,24 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function AppDownloadModal({ isOpen, onClose }: Props) {
+  const [downloadUrl, setDownloadUrl] = useState('/api/download/apk');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setDownloadUrl(`${window.location.origin}/api/download/apk`);
+    }
+  }, []);
+
   if (!isOpen) return null;
+
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(downloadUrl)}&color=1a1a1a&bgcolor=ffffff`;
 
   return (
     <div
@@ -93,42 +105,22 @@ export default function AppDownloadModal({ isOpen, onClose }: Props) {
               justifyContent: 'center',
             }}
           >
-            <svg viewBox="0 0 100 100" width="100%" height="100%">
-              <rect x="0" y="0" width="100" height="100" fill="#ffffff" />
-              {/* Corner Top-Left */}
-              <rect x="6" y="6" width="28" height="28" fill="#1a1a1a" rx="4" />
-              <rect x="12" y="12" width="16" height="16" fill="#ffffff" rx="2" />
-              <rect x="16" y="16" width="8" height="8" fill="#1a1a1a" />
-              {/* Corner Top-Right */}
-              <rect x="66" y="6" width="28" height="28" fill="#1a1a1a" rx="4" />
-              <rect x="72" y="12" width="16" height="16" fill="#ffffff" rx="2" />
-              <rect x="76" y="16" width="8" height="8" fill="#1a1a1a" />
-              {/* Corner Bottom-Left */}
-              <rect x="6" y="66" width="28" height="28" fill="#1a1a1a" rx="4" />
-              <rect x="12" y="72" width="16" height="16" fill="#ffffff" rx="2" />
-              <rect x="16" y="76" width="8" height="8" fill="#1a1a1a" />
-              {/* Data Grid Dots */}
-              <rect x="42" y="8" width="6" height="6" fill="#1a1a1a" />
-              <rect x="52" y="16" width="6" height="6" fill="#1a1a1a" />
-              <rect x="42" y="24" width="6" height="6" fill="#1a1a1a" />
-              <rect x="42" y="42" width="16" height="16" fill="#1a1a1a" rx="2" />
-              <rect x="8" y="42" width="6" height="6" fill="#1a1a1a" />
-              <rect x="24" y="48" width="6" height="6" fill="#1a1a1a" />
-              <rect x="68" y="42" width="6" height="6" fill="#1a1a1a" />
-              <rect x="80" y="52" width="6" height="6" fill="#1a1a1a" />
-              <rect x="44" y="68" width="6" height="6" fill="#1a1a1a" />
-              <rect x="56" y="78" width="6" height="6" fill="#1a1a1a" />
-              <rect x="76" y="72" width="12" height="12" fill="#1a1a1a" rx="2" />
-            </svg>
+            <img
+              src={qrImageUrl}
+              alt="Scan to download Parakh APK"
+              width={124}
+              height={124}
+              style={{ display: 'block', borderRadius: 4 }}
+            />
           </div>
           <span style={{ fontSize: 12, color: '#333333', fontWeight: 500 }}>
-            Scan with phone camera or click direct link below
+            Scan with phone camera to download directly
           </span>
         </div>
 
         <a
           href="/api/download/apk"
-          download="parakh-v1.0.0.apk"
+          download="PARAKH.apk"
           style={{
             display: 'block',
             textAlign: 'center',
@@ -146,11 +138,11 @@ export default function AppDownloadModal({ isOpen, onClose }: Props) {
           onMouseDown={(e) => (e.currentTarget.style.transform = 'translateY(1px)')}
           onMouseUp={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
         >
-          Download APK Direct File (24 MB) ↓
+          Download APK Direct File (95 MB) ↓
         </a>
 
         <div style={{ fontSize: 12, color: '#8a8a80', textAlign: 'center', fontFamily: "'JetBrains Mono', monospace" }}>
-          Target: Android 8.0+ · Package: @parakh/mobile
+          Target: Android 8.0+ · Package: @parakh/mobile · SHA-256 Verified
         </div>
       </div>
     </div>
