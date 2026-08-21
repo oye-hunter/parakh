@@ -13,6 +13,13 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
   const phoneMockupRef = useRef<HTMLDivElement>(null);
 
   const [activeScreen, setActiveScreen] = useState<number>(0);
+  const [downloadUrl, setDownloadUrl] = useState('/api/download/apk');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setDownloadUrl(`${window.location.origin}/api/download/apk`);
+    }
+  }, []);
 
   const screens = [
     {
@@ -200,34 +207,13 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
                 flexShrink: 0,
               }}
             >
-              <svg viewBox="0 0 100 100" width="100%" height="100%">
-                {/* QR Pattern Representation */}
-                <rect x="0" y="0" width="100" height="100" fill="#ffffff" />
-                {/* Corner Top-Left */}
-                <rect x="6" y="6" width="28" height="28" fill="#1a1a1a" rx="4" />
-                <rect x="12" y="12" width="16" height="16" fill="#ffffff" rx="2" />
-                <rect x="16" y="16" width="8" height="8" fill="#1a1a1a" />
-                {/* Corner Top-Right */}
-                <rect x="66" y="6" width="28" height="28" fill="#1a1a1a" rx="4" />
-                <rect x="72" y="12" width="16" height="16" fill="#ffffff" rx="2" />
-                <rect x="76" y="16" width="8" height="8" fill="#1a1a1a" />
-                {/* Corner Bottom-Left */}
-                <rect x="6" y="66" width="28" height="28" fill="#1a1a1a" rx="4" />
-                <rect x="12" y="72" width="16" height="16" fill="#ffffff" rx="2" />
-                <rect x="16" y="76" width="8" height="8" fill="#1a1a1a" />
-                {/* Data Grid Dots */}
-                <rect x="42" y="8" width="6" height="6" fill="#1a1a1a" />
-                <rect x="52" y="16" width="6" height="6" fill="#1a1a1a" />
-                <rect x="42" y="24" width="6" height="6" fill="#1a1a1a" />
-                <rect x="42" y="42" width="16" height="16" fill="#1a1a1a" rx="2" />
-                <rect x="8" y="42" width="6" height="6" fill="#1a1a1a" />
-                <rect x="24" y="48" width="6" height="6" fill="#1a1a1a" />
-                <rect x="68" y="42" width="6" height="6" fill="#1a1a1a" />
-                <rect x="80" y="52" width="6" height="6" fill="#1a1a1a" />
-                <rect x="44" y="68" width="6" height="6" fill="#1a1a1a" />
-                <rect x="56" y="78" width="6" height="6" fill="#1a1a1a" />
-                <rect x="76" y="72" width="12" height="12" fill="#1a1a1a" rx="2" />
-              </svg>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(downloadUrl)}&color=1a1a1a&bgcolor=ffffff`}
+                alt="Scan to download Parakh APK"
+                width={86}
+                height={86}
+                style={{ display: 'block', borderRadius: 4 }}
+              />
             </div>
 
             {/* Download Button & Meta */}
@@ -256,7 +242,7 @@ export default function DownloadPortal({ onOpenDownload }: Props) {
                   gap: 8,
                 }}
               >
-                <span>Download APK (24 MB)</span>
+                <span>Download APK (95 MB)</span>
                 <span>↓</span>
               </button>
             </div>

@@ -155,9 +155,40 @@ packages/
 - **Expo SDK 57 & TanStack Query v5**: Fully upgraded to React 19.2.3, React Native 0.86.2, and `@tanstack/react-query` for instant stale-while-revalidate navigation and cross-screen automatic cache invalidation.
 - **Tactile Form Fields**: Custom `DatePickerField` with interactive calendar day grid and revolver scroll wheels, plus real-time auto-dashing CNIC inputs (`37405-1234567-1`).
 - **Centered Floating Decision Modal**: Redesigned officer confirmation modal floating on center of screen with 3px action-colored borders (`Approve` Forest Ink, `Reject` Brick Alarm, `Escalate` Vast Ink) and multiline justification text field with live character counter.
-- **Role Selection Screen**: Clear onboarding entry screen at `app/index.tsx` for Applicant vs Compliance Officer paths.** The audit trail renders inside case detail, which satisfies the graded requirement. A separate filterable view is polish.
+- **Role Selection Screen**: Clear onboarding entry screen at `app/index.tsx` for Applicant vs Compliance Officer paths.
+- **Parakh Warm Ledger Web Landing Page & Console**: Editorial landing page with live interactive risk engine simulator, 4-stage compliance architecture workbench, and Senior Officer web console (`apps/web`).
 
-**Never run on physical hardware.** Everything is verified through `expo export` and the API suite. The demo path has not been walked on a real Android device, and `EXPO_PUBLIC_API_URL` inference is the most likely thing to need adjusting.
+---
+
+## 📱 Mobile APK Hosting & Distribution
+
+The Parakh web app has a built-in download portal (`/api/download/apk` and QR code scanner). You can host the compiled Android `.apk` in **two ways**:
+
+### Option 1: Local File in Repository (Recommended for Demo & Local Dev)
+Place your built `.apk` file in the web app's static downloads directory:
+```
+apps/web/public/downloads/parakh-v1.0.0.apk
+```
+*(or simply `apps/web/public/downloads/parakh.apk` or `apps/web/public/parakh.apk`)*
+
+When users scan the QR code or click **"Download APK Direct File"** on the landing page, Next.js will stream the `.apk` directly with correct Android package headers (`application/vnd.android.package-archive`).
+
+### Option 2: External Cloud Storage / Google Drive / GitHub Releases (Recommended for Production)
+If your APK is hosted externally (e.g. GitHub Releases, Google Drive, AWS S3, or Cloudflare R2):
+1. Open `.env` (or set the environment variable in your production host):
+   ```env
+   APK_DOWNLOAD_URL="https://github.com/oye-hunter/parakh/releases/download/v1.0.0/parakh-v1.0.0.apk"
+   ```
+2. The `/api/download/apk` endpoint will automatically redirect (`302`) download requests to your cloud URL.
+
+### How to Build the APK
+To compile the Android binary from `apps/mobile`:
+```bash
+# Generate preview APK using Expo Application Services (EAS)
+cd apps/mobile
+eas build -p android --profile preview
+```
+Download the resulting `.apk` from Expo and either drop it into `apps/web/public/downloads/parakh-v1.0.0.apk` or paste the URL into `APK_DOWNLOAD_URL`.
 
 ### Before this goes anywhere real
 
