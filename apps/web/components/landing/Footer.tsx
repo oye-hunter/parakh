@@ -1,6 +1,13 @@
 'use client';
 
+import { smoothScrollTo } from '@/lib/gsap';
+
 export default function Footer() {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    smoothScrollTo(targetId);
+  };
+
   return (
     <footer
       style={{
@@ -97,17 +104,29 @@ export default function Footer() {
             </div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14 }}>
               <li>
-                <a href="#simulator" style={{ color: '#1a1a1a', textDecoration: 'none' }}>
+                <a
+                  href="#simulator"
+                  onClick={(e) => handleNavClick(e, '#simulator')}
+                  style={{ color: '#1a1a1a', textDecoration: 'none', cursor: 'pointer' }}
+                >
                   Risk Profiler
                 </a>
               </li>
               <li>
-                <a href="#features" style={{ color: '#1a1a1a', textDecoration: 'none' }}>
+                <a
+                  href="#features"
+                  onClick={(e) => handleNavClick(e, '#features')}
+                  style={{ color: '#1a1a1a', textDecoration: 'none', cursor: 'pointer' }}
+                >
                   Compliance Pipeline
                 </a>
               </li>
               <li>
-                <a href="#download" style={{ color: '#1a1a1a', textDecoration: 'none' }}>
+                <a
+                  href="#download"
+                  onClick={(e) => handleNavClick(e, '#download')}
+                  style={{ color: '#1a1a1a', textDecoration: 'none', cursor: 'pointer' }}
+                >
                   Mobile APK Suite
                 </a>
               </li>
@@ -152,8 +171,26 @@ export default function Footer() {
         }}
       >
         <div>© 2026 Parakh AI Risk Profiling Platform. Every judgment, explained.</div>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace" }}>Light-Only Ledger · Next.js & GSAP ScrollTrigger</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button
+            onClick={() => smoothScrollTo(document.body, { offsetY: 0 })}
+            style={{
+              background: '#f2efdc',
+              border: '1.5px solid #1a1a1a',
+              borderRadius: 8,
+              padding: '4px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#1a1a1a',
+              cursor: 'pointer',
+            }}
+          >
+            Back to Top ↑
+          </button>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>GSAP ScrollToPlugin Active</span>
+        </div>
       </div>
     </footer>
   );
 }
+
