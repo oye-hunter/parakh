@@ -1,27 +1,52 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { smoothScrollTo } from '@/lib/gsap';
 
 interface Props {
   onOpenDownload: () => void;
-  onToggleConsole: () => void;
-  isConsoleActive: boolean;
+  onToggleConsole?: () => void;
+  isConsoleActive?: boolean;
 }
 
 export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActive }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
+
+      // Active section detection
+      const sections = ['simulator', 'features', 'download'];
+      const scrollPos = window.scrollY + 200;
+
+      let current: string | null = null;
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            current = id;
+            break;
+          }
+        }
+      }
+      setActiveSection(current);
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLinkClick = () => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
     setMobileMenuOpen(false);
+    smoothScrollTo(targetId);
   };
 
   return (
@@ -43,7 +68,28 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
         .desktop-nav-links {
           display: flex;
           align-items: center;
-          gap: 28px;
+          gap: 14px;
+        }
+        .nav-link-pill {
+          color: #1a1a1a;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 14px;
+          letter-spacing: 0.01em;
+          padding: 6px 14px;
+          border-radius: 9999px;
+          border: 1.5px solid transparent;
+          transition: all 0.2s ease;
+        }
+        .nav-link-pill:hover {
+          background: #f2efdc;
+          border-color: #1a1a1a;
+        }
+        .nav-link-pill.active {
+          background: #ffffeb;
+          border-color: #1a1a1a;
+          font-weight: 700;
+          box-shadow: 2px 2px 0 #1a1a1a;
         }
         .desktop-nav-actions {
           display: flex;
@@ -88,12 +134,17 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <a
             href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              smoothScrollTo(document.body, { offsetY: 0 });
+            }}
             style={{
               textDecoration: 'none',
               color: '#1a1a1a',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
+              cursor: 'pointer',
             }}
           >
             <span
@@ -126,41 +177,26 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
           </a>
         </div>
 
-        {/* Desktop Navigation links */}
+        {/* Desktop Navigation links with Active Pill State */}
         <nav className="desktop-nav-links">
           <a
             href="#simulator"
-            style={{
-              color: '#1a1a1a',
-              textDecoration: 'none',
-              fontWeight: 500,
-              fontSize: 14,
-              letterSpacing: '0.01em',
-            }}
+            onClick={(e) => handleNavClick(e, '#simulator')}
+            className={`nav-link-pill ${activeSection === 'simulator' ? 'active' : ''}`}
           >
             Risk Profiler
           </a>
           <a
             href="#features"
-            style={{
-              color: '#1a1a1a',
-              textDecoration: 'none',
-              fontWeight: 500,
-              fontSize: 14,
-              letterSpacing: '0.01em',
-            }}
+            onClick={(e) => handleNavClick(e, '#features')}
+            className={`nav-link-pill ${activeSection === 'features' ? 'active' : ''}`}
           >
             Compliance Engine
           </a>
           <a
             href="#download"
-            style={{
-              color: '#1a1a1a',
-              textDecoration: 'none',
-              fontWeight: 500,
-              fontSize: 14,
-              letterSpacing: '0.01em',
-            }}
+            onClick={(e) => handleNavClick(e, '#download')}
+            className={`nav-link-pill ${activeSection === 'download' ? 'active' : ''}`}
           >
             Mobile APK
           </a>
@@ -179,25 +215,34 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
               fontWeight: 600,
               cursor: 'pointer',
               fontSize: 14,
+              transition: 'all 0.15s ease',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '2px 2px 0 #1a1a1a')}
+            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}
           >
             Download App
           </button>
-          <button
-            onClick={onToggleConsole}
+          <Link
+            href="/console"
             style={{
-              background: isConsoleActive ? '#034f46' : '#ffffeb',
-              color: isConsoleActive ? '#ffffeb' : '#1a1a1a',
+              background: '#ffffeb',
+              color: '#1a1a1a',
               border: '2px solid #1a1a1a',
               borderRadius: 12,
               padding: '10px 18px',
               fontWeight: 600,
+              textDecoration: 'none',
               cursor: 'pointer',
               fontSize: 14,
+              display: 'inline-flex',
+              alignItems: 'center',
+              transition: 'all 0.15s ease',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '2px 2px 0 #1a1a1a')}
+            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}
           >
-            {isConsoleActive ? '← Landing' : 'Officer Console →'}
-          </button>
+            Officer Console →
+          </Link>
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -225,45 +270,51 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
         >
           <a
             href="#simulator"
-            onClick={handleLinkClick}
+            onClick={(e) => handleNavClick(e, '#simulator')}
             style={{
               color: '#1a1a1a',
               textDecoration: 'none',
-              fontWeight: 600,
+              fontWeight: activeSection === 'simulator' ? 700 : 600,
               fontSize: 16,
-              padding: '10px 14px',
-              borderRadius: 8,
-              background: '#f2efdc',
+              padding: '12px 14px',
+              borderRadius: 10,
+              background: activeSection === 'simulator' ? '#ffffeb' : '#f2efdc',
+              border: activeSection === 'simulator' ? '2px solid #1a1a1a' : '1.5px solid transparent',
+              boxShadow: activeSection === 'simulator' ? '2px 2px 0 #1a1a1a' : 'none',
             }}
           >
             Risk Profiler ↓
           </a>
           <a
             href="#features"
-            onClick={handleLinkClick}
+            onClick={(e) => handleNavClick(e, '#features')}
             style={{
               color: '#1a1a1a',
               textDecoration: 'none',
-              fontWeight: 600,
+              fontWeight: activeSection === 'features' ? 700 : 600,
               fontSize: 16,
-              padding: '10px 14px',
-              borderRadius: 8,
-              background: '#f2efdc',
+              padding: '12px 14px',
+              borderRadius: 10,
+              background: activeSection === 'features' ? '#ffffeb' : '#f2efdc',
+              border: activeSection === 'features' ? '2px solid #1a1a1a' : '1.5px solid transparent',
+              boxShadow: activeSection === 'features' ? '2px 2px 0 #1a1a1a' : 'none',
             }}
           >
             Compliance Engine ↓
           </a>
           <a
             href="#download"
-            onClick={handleLinkClick}
+            onClick={(e) => handleNavClick(e, '#download')}
             style={{
               color: '#1a1a1a',
               textDecoration: 'none',
-              fontWeight: 600,
+              fontWeight: activeSection === 'download' ? 700 : 600,
               fontSize: 16,
-              padding: '10px 14px',
-              borderRadius: 8,
-              background: '#f2efdc',
+              padding: '12px 14px',
+              borderRadius: 10,
+              background: activeSection === 'download' ? '#ffffeb' : '#f2efdc',
+              border: activeSection === 'download' ? '2px solid #1a1a1a' : '1.5px solid transparent',
+              boxShadow: activeSection === 'download' ? '2px 2px 0 #1a1a1a' : 'none',
             }}
           >
             Mobile APK Portal ↓
@@ -289,25 +340,27 @@ export default function Navbar({ onOpenDownload, onToggleConsole, isConsoleActiv
             >
               Download Mobile App (APK)
             </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onToggleConsole();
-              }}
+            <Link
+              href="/console"
+              onClick={() => setMobileMenuOpen(false)}
               style={{
                 width: '100%',
-                background: isConsoleActive ? '#034f46' : '#ffffeb',
-                color: isConsoleActive ? '#ffffeb' : '#1a1a1a',
+                background: '#ffffeb',
+                color: '#1a1a1a',
                 border: '2px solid #1a1a1a',
                 borderRadius: 12,
                 padding: '12px',
                 fontWeight: 600,
                 fontSize: 15,
+                textAlign: 'center',
+                textDecoration: 'none',
+                display: 'block',
+                boxSizing: 'border-box',
                 cursor: 'pointer',
               }}
             >
-              {isConsoleActive ? '← Back to Landing' : 'Senior Officer Console →'}
-            </button>
+              Senior Officer Console →
+            </Link>
           </div>
         </div>
       )}

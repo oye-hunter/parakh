@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { gsap, ScrollTrigger } from '@/lib/gsap';
+import { gsap, ScrollTrigger, smoothScrollTo } from '@/lib/gsap';
 
 interface Props {
   onOpenDownload: () => void;
@@ -347,6 +347,10 @@ export default function HeroSection({ onOpenDownload }: Props) {
             </button>
             <a
               href="#simulator"
+              onClick={(e) => {
+                e.preventDefault();
+                smoothScrollTo('#simulator');
+              }}
               style={{
                 background: '#ffffeb',
                 color: '#1a1a1a',
@@ -359,6 +363,7 @@ export default function HeroSection({ onOpenDownload }: Props) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
+                cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '3px 3px 0 #1a1a1a')}
